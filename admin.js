@@ -9,7 +9,7 @@ if (!window.supabase) {
   showStartupError('ERROR: Supabase SDK failed to load. Check your internet connection and refresh the page.');
   throw new Error('Supabase SDK not loaded');
 }
-if (!window.SUPABASE_URL || SUPABASE_URL.includes('PASTE')) {
+if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL.includes('PASTE')) {
   showStartupError('ERROR: Supabase credentials not set in config.js.');
   throw new Error('Supabase credentials missing');
 }
