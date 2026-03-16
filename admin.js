@@ -129,7 +129,21 @@ async function uploadPhoto(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
     try {
-      const resp = await fetch('/api/convert', { method: 'POST', body: file });
+      // 1. Upload the raw HEIC to Supabase Storage as a temp file
+      const tempName = `tmp-${crypto.randomUUID()}.${ext}`;
+      const { error: tmpErr } = await sb.storage
+        .from('product-images')
+        .upload(tempName, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+      if (tmpErr) throw new Error('Could not upload temp file: ' + tmpErr.message);
+
+      const { data: tmpUrl } = sb.storage.from('product-images').getPublicUrl(tempName);
+
+      // 2. Call the convert function with the storage URL (tiny JSON body, no 413)
+      const resp = await fetch('/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ storageUrl: tmpUrl.publicUrl }),
+      });
       if (!resp.ok) {
         const text = await resp.text();
         let msg = 'Server conversion failed';
@@ -138,6 +152,9 @@ async function uploadPhoto(file) {
       }
       const blob = await resp.blob();
       file = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+
+      // 3. Clean up the temp HEIC file from storage
+      await sb.storage.from('product-images').remove([tempName]);
     } catch (e) {
       uploading = false;
       spinner.style.display = 'none';

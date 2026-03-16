@@ -7,11 +7,24 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Expect JSON body with { storageUrl } — the HEIC file URL in Supabase Storage
     const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
+    for await (const chunk of req) chunks.push(chunk);
+    const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+
+    if (!body.storageUrl) {
+      res.status(400).json({ error: 'Missing storageUrl in request body.' });
+      return;
     }
-    const inputBuffer = Buffer.concat(chunks);
+
+    // Download the HEIC file from Supabase Storage (no body size limit issue)
+    const fetchResp = await fetch(body.storageUrl);
+    if (!fetchResp.ok) {
+      res.status(502).json({ error: 'Could not download file from storage.' });
+      return;
+    }
+    const arrayBuf = await fetchResp.arrayBuffer();
+    const inputBuffer = Buffer.from(arrayBuf);
 
     const jpegBuffer = await convert({
       buffer: inputBuffer,
