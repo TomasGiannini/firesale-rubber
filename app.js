@@ -1,12 +1,15 @@
 // Credentials loaded from config.js
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+let allItems = []; // stored for lightbox lookup
+
 // ============================================================
 // BOOTSTRAP
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   fetchInventory();
   setupFilterTabs();
+  setupLightbox();
 });
 
 async function fetchInventory() {
@@ -22,6 +25,7 @@ async function fetchInventory() {
     return;
   }
 
+  allItems = data;
   updateStats(data);
   renderCatalog(data);
 }
@@ -117,7 +121,7 @@ function renderCard(item) {
     : '';
 
   return `
-    <div class="product-card">
+    <div class="product-card" data-item-id="${escapeAttr(item.id)}">
       <div class="card-img">
         ${imgHTML}
         ${badgeHTML}
@@ -153,6 +157,68 @@ function setupFilterTabs() {
       }
     });
   });
+}
+
+// ============================================================
+// LIGHTBOX
+// ============================================================
+function setupLightbox() {
+  const overlay = document.getElementById('lightbox');
+  const closeBtn = document.getElementById('lightbox-close');
+
+  // Click on card opens lightbox
+  document.getElementById('catalog').addEventListener('click', (e) => {
+    const card = e.target.closest('.product-card');
+    if (!card) return;
+    const id = card.dataset.itemId;
+    const item = allItems.find(i => i.id === id);
+    if (item) openLightbox(item);
+  });
+
+  // Close on X button, overlay click, or Escape
+  closeBtn.addEventListener('click', closeLightbox);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+}
+
+function openLightbox(item) {
+  const content = document.getElementById('lightbox-content');
+  const imageUrls = parseImageUrls(item.image_url);
+
+  const imagesHTML = imageUrls.length
+    ? `<div class="lightbox-images">${imageUrls.map(url =>
+        `<img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || '')}">`
+      ).join('')}</div>`
+    : '';
+
+  const noteHTML = item.notes
+    ? `<div class="lightbox-note">${escapeHTML(item.notes)}</div>`
+    : '';
+
+  content.innerHTML = `
+    ${imagesHTML}
+    <div class="lightbox-info">
+      <div class="lightbox-name">${escapeHTML(item.name || 'Untitled')}</div>
+      ${item.category ? `<div class="lightbox-detail"><span>Category:</span> ${escapeHTML(item.category)}</div>` : ''}
+      ${item.thickness ? `<div class="lightbox-detail"><span>Thickness:</span> ${escapeHTML(item.thickness)}</div>` : ''}
+      ${item.color ? `<div class="lightbox-detail"><span>Color:</span> ${escapeHTML(item.color)}</div>` : ''}
+      ${item.quantity ? `<div class="lightbox-detail"><span>Quantity:</span> ${escapeHTML(item.quantity)}</div>` : ''}
+      ${noteHTML}
+      <div class="lightbox-cta">Interested? Call or text <a href="tel:4167881629">416 788 1629</a></div>
+    </div>
+  `;
+
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // ============================================================

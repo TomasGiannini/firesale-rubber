@@ -25,9 +25,6 @@ body { background: var(--bg); color: var(--text-primary); font-family: system-ui
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
-/* === SITE WRAPPER === */
-.site-wrapper { min-width: 1024px; }
-
 /* === HEADER === */
 .header {
   background: linear-gradient(135deg, #0d1225 0%, var(--bg) 100%);
@@ -125,6 +122,7 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; overflow: hidden;
   transition: border-color 0.2s, transform 0.15s;
+  cursor: pointer;
 }
 .product-card:hover { border-color: var(--gold); transform: translateY(-2px); }
 .card-img {
@@ -149,6 +147,43 @@ button { font-family: inherit; cursor: pointer; }
   border-left: 2px solid var(--blemish-border); border-radius: 2px;
 }
 
+/* === LIGHTBOX === */
+.lightbox-overlay {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.92); justify-content: center; align-items: center;
+  padding: 24px;
+}
+.lightbox-overlay.active { display: flex; }
+.lightbox-content {
+  max-width: 800px; width: 100%; max-height: 90vh;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.lightbox-images {
+  display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
+  border-radius: 8px;
+}
+.lightbox-images img {
+  max-height: 60vh; min-width: 60%; width: auto; object-fit: contain;
+  border-radius: 8px; scroll-snap-align: start; flex-shrink: 0;
+  background: #111;
+}
+.lightbox-info {
+  background: var(--surface); border-radius: 8px; padding: 20px;
+  border: 1px solid var(--border);
+}
+.lightbox-name { font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.lightbox-detail { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+.lightbox-detail span { color: var(--text-primary); font-weight: 600; }
+.lightbox-note { font-size: 12px; color: var(--blemish-text); font-style: italic; margin-top: 8px; padding: 8px; background: var(--blemish-bg); border-left: 2px solid var(--blemish-border); border-radius: 2px; }
+.lightbox-cta { margin-top: 12px; font-size: 13px; color: var(--gold); font-weight: 700; }
+.lightbox-cta a { color: var(--gold); text-decoration: underline; }
+.lightbox-close {
+  position: fixed; top: 16px; right: 20px; z-index: 1000;
+  background: none; border: none; color: #fff; font-size: 32px;
+  cursor: pointer; line-height: 1; padding: 8px;
+}
+.lightbox-close:hover { color: var(--gold); }
+
 /* === CONTACT STRIP === */
 .contact-strip {
   background: var(--gold); padding: 28px 32px;
@@ -171,3 +206,48 @@ button { font-family: inherit; cursor: pointer; }
 .footer-right p { font-size: 11px; color: #444; margin-top: 3px; }
 .footer-right a { color: #888; }
 .footer-right a:hover { color: var(--gold); }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .header { padding: 0 16px; height: 56px; }
+  .logo-main { font-size: 16px; letter-spacing: 2px; }
+  .logo-sub { display: none; }
+  .header-cta-text { display: none; }
+  .contact-number { font-size: 12px; }
+
+  .pickup-banner { padding: 10px 16px; gap: 6px; }
+  .pickup-divider { display: none; }
+  .pickup-sub { display: none; }
+
+  .hero { flex-direction: column; padding: 28px 16px; gap: 20px; align-items: flex-start; }
+  .hero-headline { font-size: 22px; }
+  .hero-desc { font-size: 12px; }
+  .hero-right { flex-direction: row; align-items: flex-start; gap: 24px; }
+  .stat-num { font-size: 24px; }
+  .stat { text-align: left; }
+
+  .filter-bar { padding: 16px 16px 0; gap: 6px; }
+  .filter-tab { padding: 6px 12px; font-size: 10px; }
+
+  .content { padding: 20px 16px 40px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .category-title { font-size: 16px; }
+
+  .contact-strip { flex-direction: column; padding: 24px 16px; text-align: center; gap: 12px; }
+  .contact-strip-right { text-align: center; }
+  .contact-strip-number { font-size: 24px; }
+
+  .footer { flex-direction: column; padding: 20px 16px; gap: 12px; text-align: center; }
+  .footer-right { text-align: center; }
+
+  .lightbox-content { padding: 0; }
+  .lightbox-images img { min-width: 80%; }
+}
+
+@media (max-width: 400px) {
+  .product-grid { grid-template-columns: 1fr; }
+}
