@@ -1,8 +1,19 @@
 // Credentials loaded from config.js (included before this script in admin.html)
-if (!window.supabase) {
-  document.getElementById('startup-error').textContent = 'ERROR: Supabase failed to load. Check your internet connection and refresh.';
-  document.getElementById('startup-error').style.display = 'block';
+function showStartupError(msg) {
+  const el = document.getElementById('startup-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  else { alert(msg); }
 }
+
+if (!window.supabase) {
+  showStartupError('ERROR: Supabase SDK failed to load. Check your internet connection and refresh the page.');
+  throw new Error('Supabase SDK not loaded');
+}
+if (!window.SUPABASE_URL || SUPABASE_URL.includes('PASTE')) {
+  showStartupError('ERROR: Supabase credentials not set in config.js.');
+  throw new Error('Supabase credentials missing');
+}
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
