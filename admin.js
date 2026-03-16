@@ -71,6 +71,7 @@ function renderList(items) {
       <td>${escHTML(item.name)}</td>
       <td>${escHTML(item.category)}</td>
       <td>${escHTML(item.thickness)}</td>
+      <td>${escHTML(item.size || '')}</td>
       <td>
         ${item.badge ? `<span class="badge-pill ${item.badge.toLowerCase()}">${escHTML(item.badge)}</span>` : '—'}
       </td>
@@ -93,6 +94,7 @@ function renderList(items) {
           <th>Name</th>
           <th>Category</th>
           <th>Thickness</th>
+          <th>Size</th>
           <th>Badge</th>
           <th>Status</th>
           <th>Actions</th>
@@ -241,6 +243,7 @@ function getFormData() {
     thickness: document.getElementById('f-thickness').value.trim(),
     name: document.getElementById('f-name').value.trim(),
     color: document.getElementById('f-color').value.trim(),
+    size: document.getElementById('f-size').value.trim() || null,
     quantity: document.getElementById('f-quantity').value.trim(),
     badge: document.getElementById('f-badge').value,
     notes: document.getElementById('f-notes').value.trim() || null,
@@ -254,6 +257,7 @@ function resetForm() {
   document.getElementById('f-thickness').value = '';
   document.getElementById('f-name').value = '';
   document.getElementById('f-color').value = '';
+  document.getElementById('f-size').value = '';
   document.getElementById('f-quantity').value = '';
   document.getElementById('f-badge').value = '';
   document.getElementById('f-notes').value = '';
@@ -320,6 +324,7 @@ async function startEdit(id) {
   document.getElementById('f-thickness').value = data.thickness;
   document.getElementById('f-name').value = data.name;
   document.getElementById('f-color').value = data.color || '';
+  document.getElementById('f-size').value = data.size || '';
   document.getElementById('f-quantity').value = data.quantity || '';
   document.getElementById('f-badge').value = data.badge || '';
   document.getElementById('f-notes').value = data.notes || '';

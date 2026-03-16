@@ -129,6 +129,7 @@ function renderCard(item) {
       <div class="card-body">
         <div class="card-name">${escapeHTML(item.name || '')}</div>
         <div class="card-color">Color: ${escapeHTML(item.color || '')}</div>
+        ${item.size ? `<div class="card-size">Size: ${escapeHTML(item.size)}</div>` : ''}
         <div class="card-qty">${escapeHTML(item.quantity || '')}</div>
         ${noteHTML}
       </div>
@@ -205,6 +206,7 @@ function openLightbox(item) {
       <div class="lightbox-name">${escapeHTML(item.name || 'Untitled')}</div>
       ${item.category ? `<div class="lightbox-detail"><span>Category:</span> ${escapeHTML(item.category)}</div>` : ''}
       ${item.thickness ? `<div class="lightbox-detail"><span>Thickness:</span> ${escapeHTML(item.thickness)}</div>` : ''}
+      ${item.size ? `<div class="lightbox-detail"><span>Size:</span> ${escapeHTML(item.size)}</div>` : ''}
       ${item.color ? `<div class="lightbox-detail"><span>Color:</span> ${escapeHTML(item.color)}</div>` : ''}
       ${item.quantity ? `<div class="lightbox-detail"><span>Quantity:</span> ${escapeHTML(item.quantity)}</div>` : ''}
       ${noteHTML}
