@@ -128,17 +128,22 @@ async function uploadPhoto(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   const filename = `${crypto.randomUUID()}.${ext}`;
 
-  // Upload new image first — only delete old one on success
-  const { error } = await supabase.storage
-    .from('product-images')
-    .upload(filename, file, { contentType: file.type, upsert: false });
+  let uploadError;
+  try {
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(filename, file, { contentType: file.type, upsert: false });
+    uploadError = error;
+  } catch (e) {
+    uploadError = e;
+  }
 
   uploading = false;
   spinner.style.display = 'none';
 
-  if (error) {
+  if (uploadError) {
     prompt.style.display = 'block';
-    showError('Photo upload failed. Try again.');
+    showError(`Photo upload failed: ${uploadError.message || 'Check your Supabase storage policies.'}`);
     return;
   }
 
