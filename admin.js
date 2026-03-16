@@ -80,7 +80,7 @@ function renderList(items) {
       </td>
       <td>
         <button class="btn-edit" onclick="startEdit('${item.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteItem('${item.id}', ${JSON.stringify(item.image_url || '')})">Delete</button>
+        <button class="btn-delete" onclick="deleteItem('${item.id}')">Delete</button>
       </td>
     </tr>
   `).join('');
@@ -313,12 +313,16 @@ async function startEdit(id) {
   document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
 }
 
-async function deleteItem(id, imageUrl) {
+async function deleteItem(id) {
   if (!confirm('Delete this item? This cannot be undone.')) return;
 
-  const urls = parseImageUrls(imageUrl);
-  for (const url of urls) {
-    await deleteStorageImage(url);
+  // Fetch the item first to get image URLs
+  const { data: item } = await sb.from('inventory').select('image_url').eq('id', id).single();
+  if (item) {
+    const urls = parseImageUrls(item.image_url);
+    for (const url of urls) {
+      await deleteStorageImage(url);
+    }
   }
 
   const { error } = await sb.from('inventory').delete().eq('id', id);
