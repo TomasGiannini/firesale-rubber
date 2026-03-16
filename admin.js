@@ -131,8 +131,10 @@ async function uploadPhoto(file) {
     try {
       const resp = await fetch('/api/convert', { method: 'POST', body: file });
       if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.error || 'Server conversion failed');
+        const text = await resp.text();
+        let msg = 'Server conversion failed';
+        try { msg = JSON.parse(text).error || msg; } catch(e) { msg = text.slice(0, 200) || msg; }
+        throw new Error(msg);
       }
       const blob = await resp.blob();
       file = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
