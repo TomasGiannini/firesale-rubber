@@ -1,9 +1,5 @@
-// ============================================================
-// CONFIG — paste your Google Sheets CSV URL here
-// How to get it: File → Share → Publish to web → CSV
-// Format: https://docs.google.com/spreadsheets/d/SHEET_ID/pub?output=csv
-// ============================================================
-const SHEET_CSV_URL = 'PASTE_YOUR_SHEET_URL_HERE';
+// Credentials loaded from config.js
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
 // BOOTSTRAP
@@ -13,22 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFilterTabs();
 });
 
-function fetchInventory() {
-  const url = SHEET_CSV_URL + '&t=' + Date.now(); // cache-bust
+async function fetchInventory() {
+  // Catalog shows "Loading inventory..." (existing HTML) while fetch is in flight
+  const { data, error } = await supabase
+    .from('inventory')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: true });
 
-  Papa.parse(url, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: (results) => {
-      const items = parseItems(results.data);
-      updateStats(items);
-      renderCatalog(items);
-    },
-    error: (err) => {
-      showError();
-    }
-  });
+  if (error) {
+    showError();
+    return;
+  }
+
+  updateStats(data);
+  renderCatalog(data);
 }
 
 function showError() {
@@ -36,18 +31,6 @@ function showError() {
     '<p class="error-msg">Unable to load inventory at this time. Please call Tomas at <a href="tel:4167881629">416 788 1629</a>.</p>';
   document.getElementById('stat-items').textContent = '—';
   document.getElementById('stat-categories').textContent = '—';
-}
-
-// ============================================================
-// DATA PARSING
-// ============================================================
-
-// Expected CSV columns: category, thickness, name, color, quantity, notes, image_url, badge, active
-function parseItems(rows) {
-  return rows.filter(row => {
-    const active = (row.active || '').trim().toLowerCase();
-    return active === 'true';
-  });
 }
 
 // ============================================================
@@ -71,7 +54,7 @@ function renderCatalog(items) {
   }
 
   // Group items: { category -> { thickness -> [items] } }
-  // Preserve insertion order (sheet row order)
+  // Preserve insertion order (created_at ASC = sheet row order equivalent)
   const grouped = new Map();
   for (const item of items) {
     const cat = (item.category || '').trim();
@@ -157,11 +140,9 @@ function setupFilterTabs() {
     const tab = e.target.closest('.filter-tab');
     if (!tab) return;
 
-    // Update active tab
     bar.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
 
-    // Show/hide category sections
     const filter = tab.dataset.filter;
     document.querySelectorAll('.category-section').forEach(section => {
       if (filter === 'all' || section.dataset.category === filter) {

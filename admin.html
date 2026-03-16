@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIRESALE RUBBER — Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f4f4f4; color: #222; }
+    a { color: inherit; }
+
+    /* === LAYOUT === */
+    .admin-header {
+      background: #0a0e1a; color: #fff; padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid #f0c040;
+    }
+    .admin-header h1 { font-size: 18px; font-weight: 900; letter-spacing: 2px; }
+    .admin-header h1 span { color: #f0c040; }
+    .admin-header a { font-size: 12px; color: #f0c040; }
+    .admin-body { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+    /* === FORM CARD === */
+    .form-card {
+      background: #fff; border-radius: 8px; padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 40px;
+    }
+    .form-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    input, select, textarea {
+      border: 1px solid #ddd; border-radius: 4px; padding: 8px 10px;
+      font-size: 13px; font-family: inherit; background: #fafafa;
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid #f0c040; border-color: #f0c040; background: #fff; }
+    textarea { resize: vertical; min-height: 64px; }
+
+    /* === PHOTO UPLOAD === */
+    .upload-area {
+      border: 2px dashed #ddd; border-radius: 6px; padding: 20px;
+      text-align: center; cursor: pointer; transition: border-color 0.15s;
+      background: #fafafa; min-height: 100px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    }
+    .upload-area:hover, .upload-area.drag-over { border-color: #f0c040; background: #fffdf0; }
+    .upload-area p { font-size: 12px; color: #888; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-preview { width: 100%; max-height: 160px; object-fit: contain; border-radius: 4px; }
+    .upload-spinner { font-size: 12px; color: #888; }
+
+    /* === ACTIVE TOGGLE === */
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: #f0c040; }
+    .checkbox-group label { text-transform: none; font-size: 13px; color: #333; font-weight: 400; }
+
+    /* === FORM ACTIONS === */
+    .form-actions { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+    .btn-save {
+      background: #f0c040; color: #0a0e1a; font-weight: 800; font-size: 13px;
+      padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; letter-spacing: 0.5px;
+    }
+    .btn-save:hover { background: #ffe060; }
+    .btn-save:disabled { background: #ddd; color: #999; cursor: not-allowed; }
+    .btn-cancel {
+      background: transparent; color: #888; font-size: 13px; font-weight: 600;
+      padding: 10px 16px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: #bbb; color: #555; }
+    .form-error { font-size: 12px; color: #c0392b; }
+    .form-success { font-size: 12px; color: #27ae60; }
+
+    /* === INVENTORY LIST === */
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .list-header h2 { font-size: 16px; font-weight: 700; }
+    .list-count { font-size: 12px; color: #888; }
+    .item-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .item-table th { background: #f8f8f8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #666; padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+    .item-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; vertical-align: middle; }
+    .item-table tr:last-child td { border-bottom: none; }
+    .item-table tr.inactive td { opacity: 0.45; }
+    .thumb { width: 48px; height: 36px; object-fit: cover; border-radius: 3px; background: #eee; display: block; }
+    .no-thumb { width: 48px; height: 36px; background: #eee; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #bbb; }
+    .badge-pill { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }
+    .badge-pill.hot { background: #f0c040; color: #000; }
+    .badge-pill.limited { background: #c0392b; color: #fff; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+    .status-dot.active { background: #27ae60; }
+    .status-dot.inactive { background: #bbb; }
+    .btn-edit { font-size: 11px; font-weight: 600; padding: 4px 10px; border: 1px solid #ddd; border-radius: 3px; background: #fff; cursor: pointer; }
+    .btn-edit:hover { border-color: #f0c040; color: #b08000; }
+    .btn-delete { font-size: 11px; font-weight: 600; padding: 4px 10px; border: 1px solid #fcc; border-radius: 3px; background: #fff; cursor: pointer; color: #c0392b; margin-left: 4px; }
+    .btn-delete:hover { background: #fef0f0; }
+    .empty-list { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+    .list-loading { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-header">
+    <h1>FIRESALE <span>RUBBER</span> — Admin</h1>
+    <a href="index.html">← View site</a>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- FORM -->
+    <div class="form-card">
+      <h2 id="form-title">Add New Item</h2>
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label>Photo</label>
+          <div class="upload-area" id="upload-area">
+            <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp">
+            <img class="upload-preview" id="upload-preview" style="display:none">
+            <p id="upload-prompt">Click to upload or drag a photo here</p>
+            <p class="upload-spinner" id="upload-spinner" style="display:none">Uploading...</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-category">Category</label>
+          <select id="f-category">
+            <option value="">— Select —</option>
+            <option value="Puzzle Tiles">Puzzle Tiles</option>
+            <option value="Rolls">Rolls</option>
+            <option value="Sheets">Sheets</option>
+            <option value="Acoustic">Acoustic</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="f-thickness">Thickness</label>
+          <input type="text" id="f-thickness" placeholder='e.g. 3/4"'>
+        </div>
+
+        <div class="form-group">
+          <label for="f-name">Product Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Puzzle Tile">
+        </div>
+
+        <div class="form-group">
+          <label for="f-color">Color</label>
+          <input type="text" id="f-color" placeholder="e.g. Black">
+        </div>
+
+        <div class="form-group">
+          <label for="f-quantity">Quantity</label>
+          <input type="text" id="f-quantity" placeholder="e.g. ~200 sqft">
+        </div>
+
+        <div class="form-group">
+          <label for="f-badge">Badge</label>
+          <select id="f-badge">
+            <option value="">None</option>
+            <option value="Hot">Hot</option>
+            <option value="Limited">Limited</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="f-notes">Cosmetic Notes</label>
+          <textarea id="f-notes" placeholder="e.g. Minor discolouration on select edges"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <div class="checkbox-group">
+            <input type="checkbox" id="f-active" checked>
+            <label for="f-active">Visible on site (uncheck to hide without deleting)</label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-save" id="btn-save">Save Item</button>
+        <button class="btn-cancel" id="btn-cancel" style="display:none">Cancel</button>
+        <span class="form-error" id="form-error"></span>
+        <span class="form-success" id="form-success"></span>
+      </div>
+    </div>
+
+    <!-- INVENTORY LIST -->
+    <div>
+      <div class="list-header">
+        <h2>Current Inventory</h2>
+        <span class="list-count" id="list-count"></span>
+      </div>
+      <div id="inventory-list">
+        <div class="list-loading">Loading inventory...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
