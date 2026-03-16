@@ -321,7 +321,7 @@ async function startEdit(id) {
   currentImageUrls = parseImageUrls(data.image_url);
 
   document.getElementById('f-category').value = data.category;
-  document.getElementById('f-thickness').value = data.thickness;
+  document.getElementById('f-thickness').value = parseFloat(data.thickness) || '';
   document.getElementById('f-name').value = data.name;
   document.getElementById('f-color').value = data.color || '';
   document.getElementById('f-size').value = data.size || '';
