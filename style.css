@@ -47,12 +47,7 @@ button { font-family: inherit; cursor: pointer; }
 .header-right { display: flex; align-items: center; gap: 16px; }
 .contact-name { font-size: 12px; font-weight: 700; text-align: right; }
 .contact-number { font-size: 14px; font-weight: 900; color: var(--gold); letter-spacing: 1px; text-align: right; }
-.cta-btn {
-  background: var(--gold); color: var(--bg); font-size: 12px; font-weight: 800;
-  padding: 10px 20px; border-radius: 4px; letter-spacing: 1px; text-transform: uppercase;
-  border: none; white-space: nowrap;
-}
-.cta-btn:hover { background: #ffe060; }
+.header-cta-text { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
 /* === PICKUP BANNER === */
 .pickup-banner {
