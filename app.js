@@ -98,7 +98,7 @@ function renderThicknessGroup(thickness, items) {
   const cardsHTML = items.map(renderCard).join('');
   return `
     <div class="thickness-group">
-      <div class="thickness-label">${escapeHTML(thickness)}</div>
+      <div class="thickness-label">${formatThickness(thickness)}</div>
       <div class="product-grid">${cardsHTML}</div>
     </div>
   `;
@@ -205,7 +205,7 @@ function openLightbox(item) {
     <div class="lightbox-info">
       <div class="lightbox-name">${escapeHTML(item.name || 'Untitled')}</div>
       ${item.category ? `<div class="lightbox-detail"><span>Category:</span> ${escapeHTML(item.category)}</div>` : ''}
-      ${item.thickness ? `<div class="lightbox-detail"><span>Thickness:</span> ${escapeHTML(item.thickness)}</div>` : ''}
+      ${item.thickness ? `<div class="lightbox-detail"><span>Thickness:</span> ${formatThickness(item.thickness)}</div>` : ''}
       ${item.size ? `<div class="lightbox-detail"><span>Size:</span> ${escapeHTML(item.size)}</div>` : ''}
       ${item.color ? `<div class="lightbox-detail"><span>Color:</span> ${escapeHTML(item.color)}</div>` : ''}
       ${item.quantity ? `<div class="lightbox-detail"><span>Quantity:</span> ${escapeHTML(item.quantity)}</div>` : ''}
@@ -237,6 +237,26 @@ function escapeHTML(str) {
 
 function escapeAttr(str) {
   return String(str).replace(/"/g, '&quot;');
+}
+
+function formatThickness(val) {
+  if (!val) return '';
+  const mm = parseFloat(val);
+  if (isNaN(mm)) return escapeHTML(val);
+  const inches = mm / 25.4;
+  // Show a clean fraction if close to a common one, otherwise decimal
+  const fractions = [
+    [1/8, '1/8'], [1/4, '1/4'], [3/8, '3/8'], [1/2, '1/2'],
+    [5/8, '5/8'], [3/4, '3/4'], [7/8, '7/8'], [1, '1'],
+  ];
+  let inchStr = '';
+  const match = fractions.find(([f]) => Math.abs(inches - f) < 0.02);
+  if (match) {
+    inchStr = match[1] + '"';
+  } else {
+    inchStr = inches.toFixed(2).replace(/0+$/, '').replace(/\.$/, '') + '"';
+  }
+  return `${mm}mm (${inchStr})`;
 }
 
 function parseImageUrls(value) {
