@@ -229,10 +229,7 @@ async function saveItem() {
   clearMessages();
   const data = getFormData();
 
-  // Validation
-  if (!data.category) { showError('Please select a category.'); return; }
-  if (!data.thickness) { showError('Please enter a thickness.'); return; }
-  if (!data.name) { showError('Please enter a product name.'); return; }
+  // No required fields — all inputs are optional
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
