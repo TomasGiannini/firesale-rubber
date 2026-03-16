@@ -243,20 +243,7 @@ function formatThickness(val) {
   if (!val) return '';
   const mm = parseFloat(val);
   if (isNaN(mm)) return escapeHTML(val);
-  const inches = mm / 25.4;
-  // Show a clean fraction if close to a common one, otherwise decimal
-  const fractions = [
-    [1/8, '1/8'], [1/4, '1/4'], [3/8, '3/8'], [1/2, '1/2'],
-    [5/8, '5/8'], [3/4, '3/4'], [7/8, '7/8'], [1, '1'],
-  ];
-  let inchStr = '';
-  const match = fractions.find(([f]) => Math.abs(inches - f) < 0.02);
-  if (match) {
-    inchStr = match[1] + '"';
-  } else {
-    inchStr = inches.toFixed(2).replace(/0+$/, '').replace(/\.$/, '') + '"';
-  }
-  return `${mm}mm (${inchStr})`;
+  return `${mm}mm`;
 }
 
 function parseImageUrls(value) {

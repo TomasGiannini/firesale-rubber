@@ -106,12 +106,12 @@ button { font-family: inherit; cursor: pointer; }
 /* === THICKNESS GROUP === */
 .thickness-group { margin-bottom: 24px; }
 .thickness-label {
-  display: inline-flex; align-items: center; font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; font-size: 14px; font-weight: 800;
   color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
 }
 .thickness-label::before {
-  content: ''; display: inline-block; width: 3px; height: 12px;
-  background: var(--gold); margin-right: 8px; border-radius: 2px;
+  content: ''; display: inline-block; width: 3px; height: 16px;
+  background: var(--gold); margin-right: 10px; border-radius: 2px;
 }
 
 /* === PRODUCT GRID === */
@@ -140,6 +140,7 @@ button { font-family: inherit; cursor: pointer; }
 .card-body { padding: 12px; }
 .card-name { font-size: 12px; font-weight: 700; color: #eee; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 .card-color { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+.card-size { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
 .card-qty { font-size: 10px; color: #666; margin-bottom: 8px; }
 .card-note {
   font-size: 9px; color: var(--blemish-text); font-style: italic;
