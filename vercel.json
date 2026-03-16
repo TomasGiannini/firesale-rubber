@@ -6,5 +6,10 @@
         { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/convert.js": {
+      "maxDuration": 30
+    }
+  }
 }

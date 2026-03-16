@@ -125,15 +125,21 @@ async function uploadPhoto(file) {
   spinner.style.display = 'block';
   clearMessages();
 
-  // Convert non-JPEG/PNG images (like HEIC) to JPEG via Canvas
+  // Convert non-standard formats (HEIC, TIFF, etc.) to JPEG server-side
   const ext = file.name.split('.').pop().toLowerCase();
   if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
     try {
-      file = await convertToJpeg(file);
+      const resp = await fetch('/api/convert', { method: 'POST', body: file });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Server conversion failed');
+      }
+      const blob = await resp.blob();
+      file = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
     } catch (e) {
       uploading = false;
       spinner.style.display = 'none';
-      showError('Could not convert image. Try converting to JPEG first.');
+      showError(`Could not convert image: ${e.message}`);
       return;
     }
   }
@@ -358,26 +364,6 @@ function escAttr(str) {
   return String(str || '').replace(/"/g, '&quot;');
 }
 
-// Convert any browser-supported image to JPEG using Canvas
-function convertToJpeg(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(blob => {
-        if (!blob) { reject(new Error('Canvas conversion failed')); return; }
-        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.85);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image could not be loaded')); };
-    img.src = url;
-  });
-}
 
 // Parse image_url field — handles JSON array string, plain URL, or null
 function parseImageUrls(value) {
