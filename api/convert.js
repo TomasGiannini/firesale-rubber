@@ -1,4 +1,4 @@
-const sharp = require('sharp');
+const convert = require('heic-convert');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,21 +7,21 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Read raw body as buffer
     const chunks = [];
     for await (const chunk of req) {
       chunks.push(chunk);
     }
-    const buffer = Buffer.concat(chunks);
+    const inputBuffer = Buffer.concat(chunks);
 
-    // Convert any image format to JPEG using sharp
-    const jpeg = await sharp(buffer)
-      .jpeg({ quality: 85 })
-      .toBuffer();
+    const jpegBuffer = await convert({
+      buffer: inputBuffer,
+      format: 'JPEG',
+      quality: 0.85,
+    });
 
     res.setHeader('Content-Type', 'image/jpeg');
-    res.setHeader('Content-Length', jpeg.length);
-    res.status(200).send(jpeg);
+    res.setHeader('Content-Length', jpegBuffer.length);
+    res.status(200).send(Buffer.from(jpegBuffer));
   } catch (e) {
     res.status(500).json({ error: 'Conversion failed: ' + e.message });
   }
