@@ -125,8 +125,22 @@ async function uploadPhoto(file) {
   spinner.style.display = 'block';
   clearMessages();
 
+  // Convert HEIC/HEIF to JPEG so all browsers can display them
   const ext = file.name.split('.').pop().toLowerCase();
-  const filename = `${crypto.randomUUID()}.${ext}`;
+  if ((ext === 'heic' || ext === 'heif') && window.heic2any) {
+    try {
+      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+      file = new File([blob], file.name.replace(/\.heic|\.heif$/i, '.jpg'), { type: 'image/jpeg' });
+    } catch (e) {
+      uploading = false;
+      spinner.style.display = 'none';
+      showError('Could not convert HEIC image. Try converting to JPEG first.');
+      return;
+    }
+  }
+
+  const uploadExt = file.name.split('.').pop().toLowerCase();
+  const filename = `${crypto.randomUUID()}.${uploadExt}`;
 
   let uploadError;
   try {
