@@ -20,7 +20,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // STATE
 // ============================================================
 let editingId = null;       // uuid of item being edited, or null in add mode
-let currentImageUrl = null; // image_url for the item currently in the form
+let currentImageUrls = [];  // array of image URLs for the item currently in the form
 let uploading = false;      // true while a photo upload is in progress
 
 // ============================================================
@@ -64,9 +64,9 @@ function renderList(items) {
   const rows = items.map(item => `
     <tr class="${item.active ? '' : 'inactive'}" data-id="${item.id}">
       <td>
-        ${item.image_url
-          ? `<img class="thumb" src="${escAttr(item.image_url)}" alt="">`
-          : `<div class="no-thumb">No photo</div>`}
+        ${(() => { const urls = parseImageUrls(item.image_url); return urls.length
+          ? `<img class="thumb" src="${escAttr(urls[0])}" alt="">`
+          : `<div class="no-thumb">No photo</div>`; })()}
       </td>
       <td>${escHTML(item.name)}</td>
       <td>${escHTML(item.category)}</td>
@@ -108,8 +108,12 @@ function renderList(items) {
 // ============================================================
 function setupUpload() {
   const input = document.getElementById('photo-input');
-  input.addEventListener('change', () => {
-    if (input.files[0]) uploadPhoto(input.files[0]);
+  input.addEventListener('change', async () => {
+    if (!input.files.length) return;
+    for (const file of input.files) {
+      await uploadPhoto(file);
+    }
+    input.value = '';
   });
 }
 
@@ -117,13 +121,8 @@ async function uploadPhoto(file) {
   if (uploading) return;
   uploading = true;
 
-  const prompt = document.getElementById('upload-prompt');
   const spinner = document.getElementById('upload-spinner');
-  const preview = document.getElementById('upload-preview');
-
-  prompt.style.display = 'none';
   spinner.style.display = 'block';
-  preview.style.display = 'none';
   clearMessages();
 
   const ext = file.name.split('.').pop().toLowerCase();
@@ -143,24 +142,33 @@ async function uploadPhoto(file) {
   spinner.style.display = 'none';
 
   if (uploadError) {
-    prompt.style.display = 'block';
     showError(`Photo upload failed: ${uploadError.message || 'Check your Supabase storage policies.'}`);
     return;
-  }
-
-  // New upload succeeded — delete old image (best-effort, non-blocking)
-  if (currentImageUrl) {
-    await deleteStorageImage(currentImageUrl);
   }
 
   const { data: urlData } = sb.storage
     .from('product-images')
     .getPublicUrl(filename);
 
-  currentImageUrl = urlData.publicUrl;
-  preview.src = currentImageUrl;
-  preview.style.display = 'block';
-  prompt.style.display = 'none';
+  currentImageUrls.push(urlData.publicUrl);
+  renderPhotoPreviews();
+}
+
+function renderPhotoPreviews() {
+  const container = document.getElementById('photo-previews');
+  container.innerHTML = currentImageUrls.map((url, i) => `
+    <div class="photo-thumb">
+      <img src="${escAttr(url)}" alt="">
+      <button class="remove-photo" onclick="removePhoto(${i})" title="Remove">&times;</button>
+    </div>
+  `).join('');
+}
+
+async function removePhoto(index) {
+  const url = currentImageUrls[index];
+  await deleteStorageImage(url);
+  currentImageUrls.splice(index, 1);
+  renderPhotoPreviews();
 }
 
 // Extract storage path from full public URL.
@@ -198,7 +206,7 @@ function getFormData() {
     quantity: document.getElementById('f-quantity').value.trim(),
     badge: document.getElementById('f-badge').value,
     notes: document.getElementById('f-notes').value.trim() || null,
-    image_url: currentImageUrl || null,
+    image_url: currentImageUrls.length ? JSON.stringify(currentImageUrls) : null,
     active: document.getElementById('f-active').checked,
   };
 }
@@ -212,9 +220,9 @@ function resetForm() {
   document.getElementById('f-badge').value = '';
   document.getElementById('f-notes').value = '';
   document.getElementById('f-active').checked = true;
-  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('photo-previews').innerHTML = '';
   document.getElementById('photo-input').value = '';
-  currentImageUrl = null;
+  currentImageUrls = [];
   editingId = null;
   document.getElementById('form-title').textContent = 'Add New Item';
   document.getElementById('btn-cancel').style.display = 'none';
@@ -268,7 +276,7 @@ async function startEdit(id) {
   if (error || !data) { showError('Could not load item. Try again.'); return; }
 
   editingId = id;
-  currentImageUrl = data.image_url || null;
+  currentImageUrls = parseImageUrls(data.image_url);
 
   document.getElementById('f-category').value = data.category;
   document.getElementById('f-thickness').value = data.thickness;
@@ -279,13 +287,7 @@ async function startEdit(id) {
   document.getElementById('f-notes').value = data.notes || '';
   document.getElementById('f-active').checked = data.active;
 
-  const preview = document.getElementById('upload-preview');
-  if (currentImageUrl) {
-    preview.src = currentImageUrl;
-    preview.style.display = 'block';
-  } else {
-    preview.style.display = 'none';
-  }
+  renderPhotoPreviews();
 
   document.getElementById('form-title').textContent = 'Edit Item';
   document.getElementById('btn-cancel').style.display = 'inline-block';
@@ -295,12 +297,9 @@ async function startEdit(id) {
 async function deleteItem(id, imageUrl) {
   if (!confirm('Delete this item? This cannot be undone.')) return;
 
-  if (imageUrl) {
-    const storageOk = await deleteStorageImage(imageUrl);
-    if (!storageOk) {
-      showError('Could not delete photo. Item not deleted.');
-      return;
-    }
+  const urls = parseImageUrls(imageUrl);
+  for (const url of urls) {
+    await deleteStorageImage(url);
   }
 
   const { error } = await sb.from('inventory').delete().eq('id', id);
@@ -344,4 +343,14 @@ function escHTML(str) {
 
 function escAttr(str) {
   return String(str || '').replace(/"/g, '&quot;');
+}
+
+// Parse image_url field — handles JSON array string, plain URL, or null
+function parseImageUrls(value) {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) { /* not JSON */ }
+  return [value]; // single URL string (backward compat)
 }

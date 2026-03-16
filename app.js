@@ -106,9 +106,10 @@ function renderCard(item) {
     ? `<span class="card-badge ${badge.toLowerCase()}">${escapeHTML(badge)}</span>`
     : '';
 
-  const imgHTML = item.image_url
-    ? `<img src="${escapeAttr(item.image_url)}" alt="${escapeAttr(item.name || '')}" loading="lazy"
-         onerror="this.style.display='none'">`
+  const imageUrls = parseImageUrls(item.image_url);
+  const imgHTML = imageUrls.length
+    ? imageUrls.map((url, i) => `<img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || '')}" loading="lazy"
+         onerror="this.style.display='none'" class="${i > 0 ? 'card-img-extra' : ''}">`).join('')
     : '';
 
   const noteHTML = item.notes
@@ -168,4 +169,13 @@ function escapeHTML(str) {
 
 function escapeAttr(str) {
   return String(str).replace(/"/g, '&quot;');
+}
+
+function parseImageUrls(value) {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) { /* not JSON */ }
+  return [value];
 }
