@@ -1,4 +1,8 @@
 // Credentials loaded from config.js (included before this script in admin.html)
+if (!window.supabase) {
+  document.getElementById('startup-error').textContent = 'ERROR: Supabase failed to load. Check your internet connection and refresh.';
+  document.getElementById('startup-error').style.display = 'block';
+}
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
@@ -92,23 +96,9 @@ function renderList(items) {
 // PHOTO UPLOAD
 // ============================================================
 function setupUpload() {
-  const area = document.getElementById('upload-area');
   const input = document.getElementById('photo-input');
-
   input.addEventListener('change', () => {
     if (input.files[0]) uploadPhoto(input.files[0]);
-  });
-
-  area.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    area.classList.add('drag-over');
-  });
-  area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
-  area.addEventListener('drop', (e) => {
-    e.preventDefault();
-    area.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) uploadPhoto(file);
   });
 }
 
@@ -212,7 +202,6 @@ function resetForm() {
   document.getElementById('f-notes').value = '';
   document.getElementById('f-active').checked = true;
   document.getElementById('upload-preview').style.display = 'none';
-  document.getElementById('upload-prompt').style.display = 'block';
   document.getElementById('photo-input').value = '';
   currentImageUrl = null;
   editingId = null;
@@ -283,14 +272,11 @@ async function startEdit(id) {
   document.getElementById('f-active').checked = data.active;
 
   const preview = document.getElementById('upload-preview');
-  const prompt = document.getElementById('upload-prompt');
   if (currentImageUrl) {
     preview.src = currentImageUrl;
     preview.style.display = 'block';
-    prompt.style.display = 'none';
   } else {
     preview.style.display = 'none';
-    prompt.style.display = 'block';
   }
 
   document.getElementById('form-title').textContent = 'Edit Item';
