@@ -1,5 +1,5 @@
 // Credentials loaded from config.js
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
 // BOOTSTRAP
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchInventory() {
   // Catalog shows "Loading inventory..." (existing HTML) while fetch is in flight
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('inventory')
     .select('*')
     .eq('active', true)

@@ -14,7 +14,7 @@ if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL.includes('PASTE')) {
   throw new Error('Supabase credentials missing');
 }
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
 // STATE
@@ -39,7 +39,7 @@ async function loadInventory() {
   const listEl = document.getElementById('inventory-list');
   listEl.innerHTML = '<div class="list-loading">Loading inventory...</div>';
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('inventory')
     .select('*')
     .order('created_at', { ascending: false });
@@ -131,7 +131,7 @@ async function uploadPhoto(file) {
 
   let uploadError;
   try {
-    const { error } = await supabase.storage
+    const { error } = await sb.storage
       .from('product-images')
       .upload(filename, file, { contentType: file.type, upsert: false });
     uploadError = error;
@@ -153,7 +153,7 @@ async function uploadPhoto(file) {
     await deleteStorageImage(currentImageUrl);
   }
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData } = sb.storage
     .from('product-images')
     .getPublicUrl(filename);
 
@@ -177,7 +177,7 @@ function getStoragePath(imageUrl) {
 async function deleteStorageImage(imageUrl) {
   const path = getStoragePath(imageUrl);
   if (!path) return true;
-  const { error } = await supabase.storage.from('product-images').remove([path]);
+  const { error } = await sb.storage.from('product-images').remove([path]);
   return !error;
 }
 
@@ -241,9 +241,9 @@ async function saveItem() {
   let error;
 
   if (editingId) {
-    ({ error } = await supabase.from('inventory').update(data).eq('id', editingId));
+    ({ error } = await sb.from('inventory').update(data).eq('id', editingId));
   } else {
-    ({ error } = await supabase.from('inventory').insert(data));
+    ({ error } = await sb.from('inventory').insert(data));
   }
 
   btn.disabled = false;
@@ -262,7 +262,7 @@ async function saveItem() {
 async function startEdit(id) {
   clearMessages();
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('inventory')
     .select('*')
     .eq('id', id)
@@ -306,7 +306,7 @@ async function deleteItem(id, imageUrl) {
     }
   }
 
-  const { error } = await supabase.from('inventory').delete().eq('id', id);
+  const { error } = await sb.from('inventory').delete().eq('id', id);
   if (error) {
     showError('Delete failed. The photo was removed but the item record remains — try again.');
     return;
