@@ -95,11 +95,6 @@ function setupUpload() {
   const area = document.getElementById('upload-area');
   const input = document.getElementById('photo-input');
 
-  area.addEventListener('click', (e) => {
-    if (e.target === input) return;
-    input.click();
-  });
-
   input.addEventListener('change', () => {
     if (input.files[0]) uploadPhoto(input.files[0]);
   });
