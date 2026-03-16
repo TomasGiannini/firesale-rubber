@@ -41,10 +41,10 @@ button { font-family: inherit; cursor: pointer; }
 .logo-main { font-size: 22px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
 .logo-main span { color: var(--gold); }
 .logo-sub { font-size: 9px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-.header-right { display: flex; align-items: center; gap: 16px; }
-.contact-name { font-size: 12px; font-weight: 700; text-align: right; }
-.contact-number { font-size: 14px; font-weight: 900; color: var(--gold); letter-spacing: 1px; text-align: right; }
-.header-cta-text { font-size: 12px; color: var(--text-muted); font-style: italic; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.header-cta-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.header-phone { font-size: 20px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
+.header-phone:hover { text-decoration: underline; }
 
 /* === PICKUP BANNER === */
 .pickup-banner {
@@ -216,8 +216,8 @@ button { font-family: inherit; cursor: pointer; }
   .header { padding: 0 16px; height: 56px; }
   .logo-main { font-size: 16px; letter-spacing: 2px; }
   .logo-sub { display: none; }
-  .header-cta-text { display: none; }
-  .contact-number { font-size: 12px; }
+  .header-cta-label { font-size: 9px; }
+  .header-phone { font-size: 14px; }
 
   .pickup-banner { padding: 10px 16px; gap: 6px; }
   .pickup-divider { display: none; }
