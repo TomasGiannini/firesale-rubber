@@ -125,16 +125,15 @@ async function uploadPhoto(file) {
   spinner.style.display = 'block';
   clearMessages();
 
-  // Convert HEIC/HEIF to JPEG so all browsers can display them
+  // Convert non-JPEG/PNG images (like HEIC) to JPEG via Canvas
   const ext = file.name.split('.').pop().toLowerCase();
-  if ((ext === 'heic' || ext === 'heif') && window.heic2any) {
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
     try {
-      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
-      file = new File([blob], file.name.replace(/\.heic|\.heif$/i, '.jpg'), { type: 'image/jpeg' });
+      file = await convertToJpeg(file);
     } catch (e) {
       uploading = false;
       spinner.style.display = 'none';
-      showError('Could not convert HEIC image. Try converting to JPEG first.');
+      showError('Could not convert image. Try converting to JPEG first.');
       return;
     }
   }
@@ -357,6 +356,27 @@ function escHTML(str) {
 
 function escAttr(str) {
   return String(str || '').replace(/"/g, '&quot;');
+}
+
+// Convert any browser-supported image to JPEG using Canvas
+function convertToJpeg(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('Canvas conversion failed')); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image could not be loaded')); };
+    img.src = url;
+  });
 }
 
 // Parse image_url field — handles JSON array string, plain URL, or null
