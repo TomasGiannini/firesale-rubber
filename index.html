@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIRESALE RUBBER — Overstock Flooring</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="site-wrapper">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-main">FIRESALE <span>RUBBER</span></div>
+        <div class="logo-sub">New overstock flooring — clearance pricing</div>
+      </div>
+      <div class="header-right">
+        <div class="header-contact">
+          <div class="contact-name">Tomas Giannini</div>
+          <div class="contact-number">416 788 1629</div>
+        </div>
+        <a href="tel:4167881629" class="cta-btn">Call Now</a>
+      </div>
+    </header>
+
+    <!-- PICKUP BANNER -->
+    <div class="pickup-banner">
+      <span class="pickup-pin">📍</span>
+      <span class="pickup-text">Pickup only — <strong>Vaughan, Ontario</strong></span>
+      <span class="pickup-divider">|</span>
+      <span class="pickup-sub">No shipping. Local pickup arranged after inquiry.</span>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1 class="hero-headline">Brand new rubber.<br><span>Clearance prices.</span></h1>
+        <p class="hero-desc">New overstock rubber flooring — gym tiles, rolls, sheets and acoustic underlayment. First-quality products with minor cosmetic variations. Deep discounts available, all prices negotiated.</p>
+      </div>
+      <div class="hero-right">
+        <div class="stat">
+          <div class="stat-num" id="stat-items">—</div>
+          <div class="stat-label">Items Available</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-categories">—</div>
+          <div class="stat-label">Product Types</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTER TABS -->
+    <nav class="filter-bar" id="filter-bar">
+      <button class="filter-tab active" data-filter="all">All Products</button>
+      <button class="filter-tab" data-filter="Puzzle Tiles">Puzzle Tiles</button>
+      <button class="filter-tab" data-filter="Rolls">Rolls</button>
+      <button class="filter-tab" data-filter="Sheets">Sheets</button>
+      <button class="filter-tab" data-filter="Acoustic">Acoustic</button>
+    </nav>
+
+    <!-- CATALOG (populated by app.js) -->
+    <main class="content" id="catalog">
+      <div class="loading-msg">Loading inventory...</div>
+    </main>
+
+    <!-- CONTACT STRIP -->
+    <div class="contact-strip">
+      <div class="contact-strip-left">
+        <h2 class="contact-strip-heading">See something you want?</h2>
+        <p class="contact-strip-sub">All prices negotiated — call or text to discuss quantities and availability</p>
+      </div>
+      <div class="contact-strip-right">
+        <div class="contact-strip-name">Tomas Giannini</div>
+        <a href="tel:4167881629" class="contact-strip-number">416 788 1629</a>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-logo">FIRESALE RUBBER</div>
+      <div class="footer-right">
+        <p>Tomas Giannini — <a href="tel:4167881629">416 788 1629</a></p>
+        <p>📍 Pickup only — Vaughan, Ontario</p>
+        <p>New overstock flooring, minor cosmetic variations only</p>
+      </div>
+    </footer>
+
+  </div><!-- /.site-wrapper -->
+
+  <script src="app.js"></script>
+</body>
+</html>
