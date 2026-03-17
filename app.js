@@ -119,7 +119,7 @@ function renderCard(item) {
 
   const imageUrls = parseImageUrls(item.image_url);
   const imgHTML = imageUrls.length
-    ? imageUrls.map((url, i) => `<img src="${escapeAttr(thumbUrl(url, 400))}" alt="${escapeAttr(item.name || '')}" loading="lazy"
+    ? imageUrls.map((url, i) => `<img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || '')}" loading="lazy"
          onerror="this.style.display='none'" class="${i > 0 ? 'card-img-extra' : ''}">`).join('')
     : '';
 
@@ -199,7 +199,7 @@ function openLightbox(item) {
 
   const imagesHTML = imageUrls.length
     ? `<div class="lightbox-images">${imageUrls.map(url =>
-        `<img src="${escapeAttr(thumbUrl(url, 800))}" alt="${escapeAttr(item.name || '')}">`
+        `<img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || '')}">`
       ).join('')}</div>`
     : '';
 
@@ -262,7 +262,3 @@ function parseImageUrls(value) {
   return [value];
 }
 
-function thumbUrl(url, width) {
-  if (!url) return url;
-  return url.replace('/object/public/', '/render/image/public/') + '?width=' + width + '&quality=75';
-}
