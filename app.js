@@ -69,6 +69,13 @@ function renderCatalog(items) {
     catMap.get(thick).push(item);
   }
 
+  // Sort thickness groups within each category from smallest to largest
+  for (const [, thicknessMap] of grouped) {
+    const sorted = [...thicknessMap.entries()].sort((a, b) => (parseFloat(a[0]) || 0) - (parseFloat(b[0]) || 0));
+    thicknessMap.clear();
+    for (const [k, v] of sorted) thicknessMap.set(k, v);
+  }
+
   const html = [];
   for (const [category, thicknessMap] of grouped) {
     const totalItems = [...thicknessMap.values()].flat().length;
