@@ -43,12 +43,15 @@ async function loadInventory() {
   const { data, error } = await sb
     .from('inventory')
     .select('*')
-    .order('thickness', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) {
     listEl.innerHTML = '<div class="list-loading">Failed to load inventory. Check your Supabase credentials in config.js.</div>';
     return;
   }
+
+  // Sort by numeric thickness (client-side to avoid string sorting issues)
+  data.sort((a, b) => (parseFloat(a.thickness) || 0) - (parseFloat(b.thickness) || 0));
 
   document.getElementById('list-count').textContent = `${data.length} item${data.length !== 1 ? 's' : ''}`;
   renderList(data);
