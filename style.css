@@ -91,6 +91,28 @@ button { font-family: inherit; cursor: pointer; }
 .filter-tab:hover { border-color: var(--gold); color: var(--gold); }
 .filter-tab.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
 
+/* Hot & Limited tab flair */
+.filter-tab[data-filter="hot-limited"] {
+  border-color: #c0392b;
+  color: #f0c040;
+  background: linear-gradient(135deg, rgba(192,57,43,0.15), rgba(240,192,64,0.1));
+  animation: hotPulse 2s ease-in-out infinite;
+}
+.filter-tab[data-filter="hot-limited"]:hover {
+  border-color: #f0c040;
+  background: linear-gradient(135deg, rgba(192,57,43,0.3), rgba(240,192,64,0.2));
+}
+.filter-tab[data-filter="hot-limited"].active {
+  animation: none;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  border-color: #c0392b;
+}
+@keyframes hotPulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(192,57,43,0.3); }
+  50% { box-shadow: 0 0 12px rgba(240,192,64,0.5), 0 0 20px rgba(192,57,43,0.3); }
+}
+
 /* === CONTENT === */
 .content { padding: 28px 32px 60px; }
 .loading-msg { color: var(--text-muted); font-size: 14px; padding: 40px 0; }
