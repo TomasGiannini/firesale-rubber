@@ -157,13 +157,16 @@ function setupFilterTabs() {
     tab.classList.add('active');
 
     const filter = tab.dataset.filter;
-    document.querySelectorAll('.category-section').forEach(section => {
-      if (filter === 'all' || section.dataset.category === filter) {
-        section.hidden = false;
-      } else {
-        section.hidden = true;
-      }
-    });
+    if (filter === 'hot-limited') {
+      renderCatalog(allItems.filter(i => i.badge && (i.badge.toLowerCase() === 'hot' || i.badge.toLowerCase() === 'limited')));
+    } else if (filter === 'all') {
+      renderCatalog(allItems);
+    } else {
+      renderCatalog(allItems);
+      document.querySelectorAll('.category-section').forEach(section => {
+        section.hidden = section.dataset.category !== filter;
+      });
+    }
   });
 }
 
