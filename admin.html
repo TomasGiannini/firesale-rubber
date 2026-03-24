@@ -105,6 +105,15 @@
     .btn-delete:hover { background: #fef0f0; }
     .empty-list { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
     .list-loading { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+
+    /* === ADMIN LIGHTBOX === */
+    .admin-lightbox { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.88); justify-content: center; align-items: center; padding: 24px; }
+    .admin-lightbox.active { display: flex; }
+    .admin-lightbox-close { position: fixed; top: 16px; right: 20px; z-index: 1000; background: none; border: none; color: #fff; font-size: 32px; cursor: pointer; line-height: 1; padding: 8px; }
+    .admin-lightbox-close:hover { color: #f0c040; }
+    .admin-lightbox-body { display: flex; gap: 12px; overflow-x: auto; max-width: 90vw; max-height: 85vh; align-items: center; scroll-snap-type: x mandatory; }
+    .admin-lightbox-body img { max-height: 80vh; max-width: 80vw; object-fit: contain; border-radius: 8px; scroll-snap-align: center; flex-shrink: 0; background: #111; }
+    .thumb { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -214,6 +223,12 @@
 
   </div>
 
-  <script src="admin.js?v=13"></script>
+  <!-- ADMIN LIGHTBOX -->
+  <div class="admin-lightbox" id="admin-lightbox">
+    <button class="admin-lightbox-close" id="admin-lightbox-close">&times;</button>
+    <div class="admin-lightbox-body" id="admin-lightbox-body"></div>
+  </div>
+
+  <script src="admin.js?v=14"></script>
 </body>
 </html>

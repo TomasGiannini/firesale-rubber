@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadInventory();
   setupForm();
   setupUpload();
+  setupAdminLightbox();
 });
 
 // ============================================================
@@ -65,7 +66,7 @@ function renderList(items) {
     <tr class="${item.active ? '' : 'inactive'}" data-id="${item.id}">
       <td>
         ${(() => { const urls = parseImageUrls(item.image_url); return urls.length
-          ? `<img class="thumb" src="${escAttr(urls[0])}" alt="">`
+          ? `<img class="thumb" src="${escAttr(urls[0])}" alt="" onclick="openAdminLightbox('${item.id}')">`
           : `<div class="no-thumb">No photo</div>`; })()}
       </td>
       <td>${escHTML(item.name)}</td>
@@ -374,6 +375,34 @@ function showSuccess(msg) {
 function clearMessages() {
   document.getElementById('form-error').textContent = '';
   document.getElementById('form-success').textContent = '';
+}
+
+// ============================================================
+// ADMIN LIGHTBOX
+// ============================================================
+let inventoryCache = [];
+
+function setupAdminLightbox() {
+  const overlay = document.getElementById('admin-lightbox');
+  document.getElementById('admin-lightbox-close').addEventListener('click', closeAdminLightbox);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAdminLightbox(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAdminLightbox(); });
+}
+
+async function openAdminLightbox(id) {
+  const { data } = await sb.from('inventory').select('image_url, name').eq('id', id).single();
+  if (!data) return;
+  const urls = parseImageUrls(data.image_url);
+  if (!urls.length) return;
+  const body = document.getElementById('admin-lightbox-body');
+  body.innerHTML = urls.map(url => `<img src="${escAttr(url)}" alt="${escAttr(data.name || '')}">`).join('');
+  document.getElementById('admin-lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAdminLightbox() {
+  document.getElementById('admin-lightbox').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // ============================================================
