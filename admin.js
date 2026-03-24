@@ -43,7 +43,7 @@ async function loadInventory() {
   const { data, error } = await sb
     .from('inventory')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('thickness', { ascending: true });
 
   if (error) {
     listEl.innerHTML = '<div class="list-loading">Failed to load inventory. Check your Supabase credentials in config.js.</div>';
