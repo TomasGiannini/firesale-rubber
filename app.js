@@ -85,6 +85,29 @@ function renderCatalog(items) {
   catalog.innerHTML = html.join('');
 }
 
+function renderMasterRolls(items) {
+  const catalog = document.getElementById('catalog');
+  const imagesHTML = items.map(item => {
+    const urls = parseImageUrls(item.image_url);
+    return urls.map(url =>
+      `<div class="master-roll-thumb" data-item-id="${escapeAttr(item.id)}">
+        <img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || 'Master Roll')}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      </div>`
+    ).join('');
+  }).join('');
+
+  catalog.innerHTML = `
+    <section class="category-section master-rolls-section" data-category="Master Rolls">
+      <div class="master-rolls-header">
+        <h2 class="master-rolls-title">Master Rolls</h2>
+        <p class="master-rolls-cta">Inquire with Tomas about master roll availability and pricing</p>
+        <a href="tel:4167881629" class="master-rolls-phone">416 788 1629</a>
+      </div>
+      ${imagesHTML.length ? `<div class="master-rolls-grid">${imagesHTML}</div>` : ''}
+    </section>
+  `;
+}
+
 function renderCategorySection(category, thicknessMap, totalItems) {
   if (category === 'Master Rolls') {
     const allImages = [...thicknessMap.values()].flat();
@@ -182,6 +205,8 @@ function setupFilterTabs() {
     const filter = tab.dataset.filter;
     if (filter === 'hot-limited') {
       renderCatalog(allItems.filter(i => i.badge && (i.badge.toLowerCase() === 'hot' || i.badge.toLowerCase() === 'limited')));
+    } else if (filter === 'Master Rolls') {
+      renderMasterRolls(allItems.filter(i => (i.category || '').trim() === 'Master Rolls'));
     } else if (filter === 'all') {
       renderCatalog(allItems);
     } else {
