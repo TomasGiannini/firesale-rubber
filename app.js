@@ -86,6 +86,29 @@ function renderCatalog(items) {
 }
 
 function renderCategorySection(category, thicknessMap, totalItems) {
+  if (category === 'Master Rolls') {
+    const allImages = [...thicknessMap.values()].flat();
+    const imagesHTML = allImages.map(item => {
+      const urls = parseImageUrls(item.image_url);
+      return urls.map(url =>
+        `<div class="master-roll-thumb" data-item-id="${escapeAttr(item.id)}">
+          <img src="${escapeAttr(url)}" alt="${escapeAttr(item.name || 'Master Roll')}" loading="lazy" onerror="this.parentElement.style.display='none'">
+        </div>`
+      ).join('');
+    }).join('');
+
+    return `
+      <section class="category-section master-rolls-section" data-category="Master Rolls">
+        <div class="master-rolls-header">
+          <h2 class="master-rolls-title">Master Rolls</h2>
+          <p class="master-rolls-cta">Inquire with Tomas about master roll availability and pricing</p>
+          <a href="tel:4167881629" class="master-rolls-phone">416 788 1629</a>
+        </div>
+        <div class="master-rolls-grid">${imagesHTML}</div>
+      </section>
+    `;
+  }
+
   const thicknessHTML = [...thicknessMap.entries()]
     .map(([thickness, items]) => renderThicknessGroup(thickness, items))
     .join('');
@@ -179,7 +202,7 @@ function setupLightbox() {
 
   // Click on card opens lightbox
   document.getElementById('catalog').addEventListener('click', (e) => {
-    const card = e.target.closest('.product-card');
+    const card = e.target.closest('.product-card') || e.target.closest('.master-roll-thumb');
     if (!card) return;
     const id = card.dataset.itemId;
     const item = allItems.find(i => i.id === id);
