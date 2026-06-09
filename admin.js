@@ -46,7 +46,8 @@ async function loadInventory() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    listEl.innerHTML = '<div class="list-loading">Failed to load inventory. Check your Supabase credentials in config.js.</div>';
+    const isRLS = error.message && error.message.toLowerCase().includes('row-level security');
+    listEl.innerHTML = `<div class="list-loading">Failed to load inventory. ${isRLS ? 'RLS policy blocked the read. Check Supabase policies.' : 'Check your Supabase credentials in config.js.'}</div>`;
     return;
   }
 
@@ -136,7 +137,7 @@ async function uploadPhoto(file) {
   if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
     try {
       // 1. Upload the raw HEIC to Supabase Storage as a temp file
-      const tempName = `tmp-${crypto.randomUUID()}.${ext}`;
+      const tempName = `tmp-${generateId()}.${ext}`;
       const { error: tmpErr } = await sb.storage
         .from('product-images')
         .upload(tempName, file, { contentType: file.type || 'application/octet-stream', upsert: false });
@@ -170,7 +171,7 @@ async function uploadPhoto(file) {
   }
 
   const uploadExt = file.name.split('.').pop().toLowerCase();
-  const filename = `${crypto.randomUUID()}.${uploadExt}`;
+  const filename = `${generateId()}.${uploadExt}`;
 
   let uploadError;
   try {
@@ -186,7 +187,8 @@ async function uploadPhoto(file) {
   spinner.style.display = 'none';
 
   if (uploadError) {
-    showError(`Photo upload failed: ${uploadError.message || 'Check your Supabase storage policies.'}`);
+    const isRLS = uploadError.message && uploadError.message.toLowerCase().includes('row-level security');
+    showError(isRLS ? 'Photo upload failed: RLS policy blocked the storage write. Check Supabase storage policies.' : `Photo upload failed: ${uploadError.message || 'Check your Supabase storage policies.'}`);
     return;
   }
 
@@ -301,7 +303,8 @@ async function saveItem() {
   btn.textContent = 'Save Item';
 
   if (error) {
-    showError('Save failed. Check your connection and try again.');
+    const isRLS = error.message && error.message.toLowerCase().includes('row-level security');
+    showError(isRLS ? 'Save failed: RLS policy blocked the write. Check Supabase policies.' : 'Save failed. Check your connection and try again.');
     return;
   }
 
@@ -355,7 +358,8 @@ async function deleteItem(id) {
 
   const { error } = await sb.from('inventory').delete().eq('id', id);
   if (error) {
-    showError('Delete failed. The photo was removed but the item record remains — try again.');
+    const isRLS = error.message && error.message.toLowerCase().includes('row-level security');
+    showError(isRLS ? 'Delete failed: RLS policy blocked the write. Check Supabase policies.' : 'Delete failed. The photo was removed but the item record remains — try again.');
     return;
   }
 
@@ -420,8 +424,23 @@ function escHTML(str) {
     .replace(/'/g, '&#39;');
 }
 
+function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 function escAttr(str) {
-  return String(str || '').replace(/"/g, '&quot;');
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 

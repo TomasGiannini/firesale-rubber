@@ -120,6 +120,42 @@
 
   <div id="startup-error" style="display:none;background:#c0392b;color:#fff;padding:12px 24px;font-size:13px;font-weight:600;"></div>
 
+  <!-- PASSWORD GATE -->
+  <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:#0a0e1a;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:32px;border-radius:8px;max-width:320px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+      <h2 style="font-size:16px;font-weight:700;margin-bottom:16px;color:#0a0e1a;">Admin Access</h2>
+      <input type="password" id="admin-password" placeholder="Password" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;margin-bottom:12px;font-size:14px;font-family:inherit;">
+      <button id="login-btn" style="width:100%;padding:10px;background:#f0c040;color:#0a0e1a;font-weight:700;border:none;border-radius:4px;cursor:pointer;font-size:14px;">Enter</button>
+      <p id="login-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;font-weight:600;">Incorrect password.</p>
+    </div>
+  </div>
+  <script>
+  (function() {
+    const overlay = document.getElementById('login-overlay');
+    const input = document.getElementById('admin-password');
+    const btn = document.getElementById('login-btn');
+    const error = document.getElementById('login-error');
+    const correct = 'citybassboy';
+    if (sessionStorage.getItem('admin-auth') === '1') {
+      overlay.style.display = 'none';
+      return;
+    }
+    function check() {
+      if (input.value === correct) {
+        sessionStorage.setItem('admin-auth', '1');
+        overlay.style.display = 'none';
+      } else {
+        error.style.display = 'block';
+        input.value = '';
+        input.focus();
+      }
+    }
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); });
+    input.focus();
+  })();
+  </script>
+
   <div class="admin-header">
     <h1>FIRESALE <span>RUBBER</span> — Admin</h1>
     <a href="index.html">← View site</a>
