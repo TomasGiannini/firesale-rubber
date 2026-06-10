@@ -138,6 +138,32 @@ export default function CatalogClient() {
 
   return (
     <>
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-left">
+          <h1 className="hero-headline">
+            Brand new rubber gym flooring.
+            <br />
+            <span>Clearance prices.</span>
+          </h1>
+          <p className="hero-desc">
+            New overstock rubber gym flooring — puzzle tiles, rolls, sheets and
+            acoustic underlayment. First-quality products with minor cosmetic
+            variations. Deep discounts available, all prices negotiated.
+          </p>
+        </div>
+        <div className="hero-right">
+          <div className="stat">
+            <div className="stat-num">{loading ? '—' : totalItems}</div>
+            <div className="stat-label">Items Available</div>
+          </div>
+          <div className="stat">
+            <div className="stat-num">{loading ? '—' : categories.size}</div>
+            <div className="stat-label">Product Types</div>
+          </div>
+        </div>
+      </section>
+
       <nav className="filter-bar" id="filter-bar">
         {FILTERS.map((f) => (
           <button
