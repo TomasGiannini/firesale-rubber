@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { SEO_CONFIG } from '@/lib/seo'
 import { WebsiteJsonLd } from '@/components/seo/WebsiteJsonLd'
 import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd'
@@ -74,6 +75,8 @@ export default function RootLayout({
         <WebsiteJsonLd />
         <OrganizationJsonLd />
         {children}
+        {/* Google Analytics 4 — G-8K01V21DQ6 */}
+        <GoogleAnalytics gaId="G-8K01V21DQ6" />
       </body>
     </html>
   )
