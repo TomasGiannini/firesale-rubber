@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'YOUR_GOOGLE_VERIFICATION_CODE',
+    google: 'google8f75b854d05527bc',
   },
 }
 
