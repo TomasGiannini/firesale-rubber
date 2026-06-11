@@ -422,6 +422,71 @@ button { font-family: inherit; cursor: pointer; }
 .admin-lightbox-body { display: flex; gap: 12px; overflow-x: auto; max-width: 90vw; max-height: 85vh; align-items: center; scroll-snap-type: x mandatory; }
 .admin-lightbox-body img { max-height: 80vh; max-width: 80vw; object-fit: contain; border-radius: 8px; scroll-snap-align: center; flex-shrink: 0; background: #111; }
 
+.hero-subscribe {
+  text-align: right;
+  min-width: 260px;
+}
+.hero-subscribe-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.hero-subscribe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+.hero-subscribe-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-inner);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+.hero-subscribe-input:focus {
+  outline: 2px solid var(--gold);
+  border-color: var(--gold);
+}
+.hero-subscribe-button {
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.hero-subscribe-button:hover:not(:disabled) {
+  background: #ffe060;
+}
+.hero-subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.hero-subscribe-message {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.hero-subscribe-message.success {
+  color: var(--pickup-text);
+}
+.hero-subscribe-message.error {
+  color: #e74c3c;
+}
+
 .subscribe-section {
   background: linear-gradient(135deg, #0d1225 0%, var(--bg) 100%);
   border-bottom: 1px solid var(--border);
@@ -498,6 +563,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 @media (max-width: 700px) {
+  .hero-subscribe { text-align: left; min-width: auto; width: 100%; }
+  .hero-subscribe-form { align-items: stretch; }
   .subscribe-section { padding: 24px 16px; }
   .subscribe-form { flex-direction: column; }
   .subscribe-button { width: 100%; }

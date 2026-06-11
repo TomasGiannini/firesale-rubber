@@ -66,6 +66,44 @@ export default function CatalogClient() {
   const [error, setError] = useState(false)
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null)
 
+  const [subEmail, setSubEmail] = useState('')
+  const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [subMessage, setSubMessage] = useState('')
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault()
+    if (!subEmail.trim() || !subEmail.includes('@')) {
+      setSubStatus('error')
+      setSubMessage('Please enter a valid email.')
+      return
+    }
+
+    setSubStatus('loading')
+    setSubMessage('')
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: subEmail }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setSubStatus('error')
+        setSubMessage(data.error || 'Something went wrong.')
+      } else {
+        setSubStatus('success')
+        setSubMessage("You're on the list.")
+        setSubEmail('')
+      }
+    } catch {
+      setSubStatus('error')
+      setSubMessage('Network error. Please try again.')
+    }
+  }
+
   useEffect(() => {
     async function fetchInventory() {
       const { data, error } = await sb
@@ -157,13 +195,28 @@ export default function CatalogClient() {
           </p>
         </div>
         <div className="hero-right">
-          <div className="stat">
-            <div className="stat-num">{loading ? '—' : totalItems}</div>
-            <div className="stat-label">Items Available</div>
-          </div>
-          <div className="stat">
-            <div className="stat-num">{loading ? '—' : categories.size}</div>
-            <div className="stat-label">Product Types</div>
+          <div className="hero-subscribe">
+            <p className="hero-subscribe-label">Get notified when new stock drops</p>
+            <form className="hero-subscribe-form" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={subEmail}
+                onChange={(e) => setSubEmail(e.target.value)}
+                required
+                className="hero-subscribe-input"
+              />
+              <button
+                type="submit"
+                disabled={subStatus === 'loading'}
+                className="hero-subscribe-button"
+              >
+                {subStatus === 'loading' ? 'Subscribing...' : 'Notify Me'}
+              </button>
+            </form>
+            {subMessage && (
+              <p className={`hero-subscribe-message ${subStatus}`}>{subMessage}</p>
+            )}
           </div>
         </div>
       </section>
