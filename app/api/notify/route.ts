@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const mailerLiteKey = process.env.MAILERLITE_API_KEY
     const resendKey = process.env.RESEND_API_KEY
     const groupId = process.env.MAILERLITE_GROUP_ID
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@firesalerubber.com'
     const fromName = process.env.MAILERLITE_FROM_NAME || 'Firesale Rubber'
 
     if (!mailerLiteKey || !resendKey) {
