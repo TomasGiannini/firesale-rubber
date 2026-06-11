@@ -33,10 +33,11 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="header">
         <div className="logo">
-          <div className="logo-main">
-            FIRESALE <span>RUBBER</span>
-          </div>
-          <div className="logo-sub">Overstock rubber gym flooring — clearance pricing</div>
+          <img
+            src="/logo.png"
+            alt="Firesale Rubber"
+            style={{ height: 44, width: 'auto', display: 'block' }}
+          />
         </div>
         <div className="header-right">
           <div className="header-cta-label">Interested? Call Tomas</div>
@@ -78,7 +79,9 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="footer">
-        <div className="footer-logo">FIRESALE RUBBER</div>
+        <div className="footer-logo">
+          <img src="/logo.png" alt="Firesale Rubber" style={{ height: 28, width: 'auto', display: 'block' }} />
+        </div>
         <div className="footer-right">
           <p>
             Tomas Giannini — <a href="tel:4167881629">416 788 1629</a>
