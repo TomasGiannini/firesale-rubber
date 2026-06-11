@@ -53,12 +53,21 @@ export async function POST(request: NextRequest) {
 
     // 1. Fetch subscribers from MailerLite group
     console.log('[NOTIFY] Fetching subscribers from group:', groupId)
-    const emails = await fetchSubscribersFromGroup(mailerLiteKey, groupId)
-    console.log('[NOTIFY] Found subscribers:', emails.length)
+    const allEmails = await fetchSubscribersFromGroup(mailerLiteKey, groupId)
+    console.log('[NOTIFY] Found subscribers:', allEmails.length)
+
+    // Filter out test domains that Resend blocks
+    const blockedDomains = ['example.com', 'test.com', 'localhost']
+    const emails = allEmails.filter((email) => {
+      const domain = email.split('@')[1]?.toLowerCase()
+      return domain && !blockedDomains.includes(domain)
+    })
 
     if (emails.length === 0) {
-      return NextResponse.json({ error: 'No subscribers in group.' }, { status: 400 })
+      return NextResponse.json({ error: 'No valid subscribers in group.' }, { status: 400 })
     }
+
+    console.log('[NOTIFY] Valid subscribers after filtering:', emails.length)
 
     // 2. Build email payload
     const htmlContent = `
