@@ -32,12 +32,18 @@ export default function HomePage() {
     <div className="site-wrapper">
       {/* HEADER */}
       <header className="header">
-        <div className="logo">
+        <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <img
             src="/logo.png"
             alt="Firesale Rubber"
-            style={{ height: 44, width: 'auto', display: 'block' }}
+            style={{ height: 56, width: 'auto', display: 'block' }}
           />
+          <div>
+            <div className="logo-main">
+              FIRESALE <span>RUBBER</span>
+            </div>
+            <div className="logo-sub">Overstock rubber gym flooring — clearance pricing</div>
+          </div>
         </div>
         <div className="header-right">
           <div className="header-cta-label">Interested? Call Tomas</div>
