@@ -1,30 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-async function deleteCampaign(apiKey: string, campaignId: string) {
-  try {
-    await fetch(`https://connect.mailerlite.com/api/campaigns/${campaignId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+interface Subscriber {
+  id: string
+  email: string
+}
+
+async function fetchSubscribersFromGroup(apiKey: string, groupId: string): Promise<string[]> {
+  const emails: string[] = []
+  let url: string | null = `https://connect.mailerlite.com/api/groups/${groupId}/subscribers?limit=100`
+
+  while (url) {
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json',
+      },
     })
-  } catch {
-    /* ignore cleanup errors */
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`MailerLite error ${res.status}: ${text}`)
+    }
+
+    const data = await res.json()
+    const subscribers: Subscriber[] = data.data || []
+
+    for (const sub of subscribers) {
+      if (sub.email) emails.push(sub.email)
+    }
+
+    url = data.links?.next || null
   }
+
+  return emails
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.MAILERLITE_API_KEY
-    if (!apiKey) {
-      console.error('[NOTIFY] MAILERLITE_API_KEY missing')
-      return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 })
+    const mailerLiteKey = process.env.MAILERLITE_API_KEY
+    const resendKey = process.env.RESEND_API_KEY
+    const groupId = process.env.MAILERLITE_GROUP_ID
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+    const fromName = process.env.MAILERLITE_FROM_NAME || 'Firesale Rubber'
+
+    if (!mailerLiteKey || !resendKey) {
+      return NextResponse.json({ error: 'Missing API keys.' }, { status: 500 })
     }
 
-    const fromEmail = process.env.MAILERLITE_FROM_EMAIL || 'tomasjgiannini@gmail.com'
-    const fromName = process.env.MAILERLITE_FROM_NAME || 'Firesale Rubber'
-    const groupId = process.env.MAILERLITE_GROUP_ID
+    if (!groupId) {
+      return NextResponse.json({ error: 'Missing MailerLite group ID.' }, { status: 500 })
+    }
 
-    const campaignName = `New Stock Alert - ${new Date().toLocaleDateString('en-CA')}`
+    // 1. Fetch subscribers from MailerLite group
+    console.log('[NOTIFY] Fetching subscribers from group:', groupId)
+    const emails = await fetchSubscribersFromGroup(mailerLiteKey, groupId)
+    console.log('[NOTIFY] Found subscribers:', emails.length)
 
+    if (emails.length === 0) {
+      return NextResponse.json({ error: 'No subscribers in group.' }, { status: 400 })
+    }
+
+    // 2. Build email payload
     const htmlContent = `
       <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; color: #111;">
         <h2 style="color: #0a0e1a; font-size: 22px; margin-bottom: 16px;">New Stock Alert</h2>
@@ -39,114 +75,56 @@ export async function POST(request: NextRequest) {
           </a>
         </p>
         <p style="font-size: 13px; color: #888; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px;">
-          You're receiving this because you subscribed to stock alerts at Firesale Rubber.<br/>
-          <a href="{$unsubscribe}" style="color: #888;">Unsubscribe</a>
+          You're receiving this because you subscribed to stock alerts at Firesale Rubber.
         </p>
       </div>
     `
 
-    // 1. Create campaign draft with content included
-    const campaignBody: Record<string, unknown> = {
-      name: campaignName,
-      type: 'regular',
-      emails: [
-        {
-          subject: 'New stock just dropped at Firesale Rubber',
-          from: fromEmail,
-          from_name: fromName,
-          content: htmlContent,
+    const subject = 'New stock just dropped at Firesale Rubber'
+    const from = `${fromName} <${fromEmail}>`
+
+    // 3. Send via Resend batch API (max 100 per batch)
+    const batchSize = 100
+    let sentCount = 0
+
+    for (let i = 0; i < emails.length; i += batchSize) {
+      const batch = emails.slice(i, i + batchSize)
+      const batchPayload = batch.map((email) => ({
+        from,
+        to: [email],
+        subject,
+        html: htmlContent,
+      }))
+
+      console.log(`[NOTIFY] Sending batch ${Math.floor(i / batchSize) + 1} (${batch.length} emails)`)
+
+      const res = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
         },
-      ],
+        body: JSON.stringify(batchPayload),
+      })
+
+      const resText = await res.text()
+      console.log(`[NOTIFY] Batch response:`, res.status, resText)
+
+      if (!res.ok) {
+        return NextResponse.json(
+          {
+            error: `Failed to send batch ${Math.floor(i / batchSize) + 1}.`,
+            detail: resText,
+          },
+          { status: 500 }
+        )
+      }
+
+      sentCount += batch.length
     }
 
-    if (groupId) {
-      campaignBody.groups = [String(groupId)]
-    }
-
-    console.log('[NOTIFY] Step 1 — Creating campaign. Body:', JSON.stringify(campaignBody, null, 2))
-
-    const campaignRes = await fetch('https://connect.mailerlite.com/api/campaigns', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(campaignBody),
-    })
-
-    const campaignText = await campaignRes.text()
-    console.log('[NOTIFY] Step 1 — Response status:', campaignRes.status)
-    console.log('[NOTIFY] Step 1 — Raw response:', campaignText)
-
-    if (!campaignRes.ok) {
-      let data
-      try { data = JSON.parse(campaignText) } catch { data = {} }
-      return NextResponse.json(
-        {
-          step: 'create_campaign',
-          status: campaignRes.status,
-          error: data.message || 'Failed to create campaign.',
-          fullResponse: data,
-        },
-        { status: 400 }
-      )
-    }
-
-    // Extract campaign ID from raw text to avoid JS integer precision loss
-    const idMatch = campaignText.match(/"id"\s*:\s*"?(\d+)"?/)
-    const campaignId = idMatch ? idMatch[1] : null
-
-    if (!campaignId) {
-      console.error('[NOTIFY] Could not extract campaign ID from raw response:', campaignText)
-      return NextResponse.json(
-        {
-          step: 'extract_campaign_id',
-          error: 'Campaign created but no ID found in response.',
-          rawResponse: campaignText,
-        },
-        { status: 500 }
-      )
-    }
-
-    console.log('[NOTIFY] Step 1 — Campaign ID:', campaignId)
-
-    // 2. Send campaign (new API uses /send, not /actions/send)
-    const sendUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}/send`
-    console.log('[NOTIFY] Step 2 — Sending campaign. URL:', sendUrl)
-
-    const sendRes = await fetch(sendUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: 'application/json',
-      },
-    })
-
-    const sendText = await sendRes.text()
-    console.log('[NOTIFY] Step 2 — Response status:', sendRes.status)
-    console.log('[NOTIFY] Step 2 — Raw response:', sendText)
-
-    if (!sendRes.ok) {
-      let data
-      try { data = JSON.parse(sendText) } catch { data = {} }
-      await deleteCampaign(apiKey, campaignId)
-      return NextResponse.json(
-        {
-          step: 'send_campaign',
-          status: sendRes.status,
-          campaignId,
-          error: data.message || 'Failed to send campaign.',
-          fullResponse: data,
-        },
-        { status: 400 }
-      )
-    }
-
-    console.log('[NOTIFY] Success — Campaign sent. ID:', campaignId)
-    await deleteCampaign(apiKey, campaignId)
-    console.log('[NOTIFY] Campaign deleted after send. ID:', campaignId)
-    return NextResponse.json({ success: true, campaignId })
+    console.log('[NOTIFY] Success — Sent to', sentCount, 'subscribers')
+    return NextResponse.json({ success: true, sentCount })
   } catch (err) {
     console.error('[NOTIFY] Unhandled exception:', err)
     return NextResponse.json(
