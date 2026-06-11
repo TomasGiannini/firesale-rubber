@@ -33,11 +33,11 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="header">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ background: '#f4efe4', borderRadius: '50%', padding: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+          <div style={{ background: '#f4efe4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 62 }}>
             <img
               src="/logo.png"
               alt="Firesale Rubber"
-              style={{ height: 48, width: 'auto', display: 'block' }}
+              style={{ height: 60, width: 'auto', display: 'block' }}
             />
           </div>
           <div>
