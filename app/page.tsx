@@ -33,11 +33,13 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="header">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <img
-            src="/logo.png"
-            alt="Firesale Rubber"
-            style={{ height: 62, width: 62, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
-          />
+          <div style={{ backgroundColor: 'white', borderRadius: '50%', padding: 3 }}>
+            <img
+              src="/logo.png"
+              alt="Firesale Rubber"
+              style={{ height: 56, width: 56, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
           <div>
             <div className="logo-main">
               FIRESALE <span>RUBBER</span>
@@ -86,7 +88,9 @@ export default function HomePage() {
       {/* FOOTER */}
       <footer className="footer">
         <div className="footer-logo">
-          <img src="/logo.png" alt="Firesale Rubber" style={{ height: 28, width: 'auto', display: 'block' }} />
+          <div style={{ backgroundColor: 'white', borderRadius: '50%', padding: 2, display: 'inline-block' }}>
+            <img src="/logo.png" alt="Firesale Rubber" style={{ height: 24, width: 24, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+          </div>
         </div>
         <div className="footer-right">
           <p>
