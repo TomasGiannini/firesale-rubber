@@ -30,7 +30,7 @@ button { font-family: inherit; cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 68px;
+  height: 84px;
   position: sticky;
   top: 0;
   z-index: 100;
