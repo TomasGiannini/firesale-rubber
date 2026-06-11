@@ -142,7 +142,7 @@ export default function CatalogClient() {
       <section className="hero">
         <div className="hero-left">
           <h1 className="hero-headline">
-            Brand new rubber gym flooring.
+            Commercial-grade rubber flooring.
             <br />
             <span>Clearance prices.</span>
           </h1>
