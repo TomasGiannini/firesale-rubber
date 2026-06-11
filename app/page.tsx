@@ -37,7 +37,7 @@ export default function HomePage() {
             <img
               src="/logo.png"
               alt="Firesale Rubber"
-              style={{ height: 60, width: 'auto', display: 'block' }}
+              style={{ height: 62, width: 'auto', display: 'block' }}
             />
           </div>
           <div>
