@@ -218,6 +218,10 @@ export default function CatalogClient() {
               <p className={`hero-subscribe-message ${subStatus}`}>{subMessage}</p>
             )}
           </div>
+          <div className="hero-contact-cta">
+            <div className="hero-contact-label">Contact Tomas to purchase</div>
+            <a href="tel:4167881629" className="hero-contact-phone">416 788 1629</a>
+          </div>
         </div>
       </section>
 
