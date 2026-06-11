@@ -57,11 +57,7 @@ export default function HomePage() {
       <div className="pickup-banner">
         <span className="pickup-pin">📍</span>
         <span className="pickup-text">
-          Pickup only — <strong>Vaughan, Ontario</strong>
-        </span>
-        <span className="pickup-divider">|</span>
-        <span className="pickup-sub">
-          No shipping. Local pickup arranged after inquiry.
+          PICKUP — <strong>VAUGHAN, ONTARIO</strong>
         </span>
       </div>
 
