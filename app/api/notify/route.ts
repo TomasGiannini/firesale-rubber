@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
     const fromName = process.env.MAILERLITE_FROM_NAME || 'Firesale Rubber'
     const groupId = process.env.MAILERLITE_GROUP_ID
 
+    const campaignName = `New Stock Alert - ${new Date().toLocaleDateString('en-CA')}`
+
     const htmlContent = `
       <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; color: #111;">
         <h2 style="color: #0a0e1a; font-size: 22px; margin-bottom: 16px;">New Stock Alert</h2>
@@ -43,15 +45,16 @@ export async function POST(request: NextRequest) {
       </div>
     `
 
-    // 1. Create campaign draft
+    // 1. Create campaign draft with content included
     const campaignBody: Record<string, unknown> = {
-      name: `New Stock Alert - ${new Date().toLocaleDateString('en-CA')}`,
+      name: campaignName,
       type: 'regular',
       emails: [
         {
           subject: 'New stock just dropped at Firesale Rubber',
           from: fromEmail,
           from_name: fromName,
+          content: htmlContent,
         },
       ],
     }
@@ -108,55 +111,9 @@ export async function POST(request: NextRequest) {
 
     console.log('[NOTIFY] Step 1 — Campaign ID:', campaignId)
 
-    // 2. Update campaign with content (new API — no /content endpoint)
-    const updateBody = {
-      emails: [
-        {
-          subject: 'New stock just dropped at Firesale Rubber',
-          from: fromEmail,
-          from_name: fromName,
-          content: htmlContent,
-        },
-      ],
-    }
-
-    const updateUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}`
-    console.log('[NOTIFY] Step 2 — Updating campaign content. URL:', updateUrl)
-    console.log('[NOTIFY] Step 2 — Update body:', JSON.stringify(updateBody, null, 2))
-
-    const updateRes = await fetch(updateUrl, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(updateBody),
-    })
-
-    const updateText = await updateRes.text()
-    console.log('[NOTIFY] Step 2 — Response status:', updateRes.status)
-    console.log('[NOTIFY] Step 2 — Raw response:', updateText)
-
-    if (!updateRes.ok) {
-      let data
-      try { data = JSON.parse(updateText) } catch { data = {} }
-      await deleteCampaign(apiKey, campaignId)
-      return NextResponse.json(
-        {
-          step: 'update_campaign_content',
-          status: updateRes.status,
-          campaignId,
-          error: data.message || 'Failed to set campaign content.',
-          fullResponse: data,
-        },
-        { status: 400 }
-      )
-    }
-
-    // 3. Send campaign (new API uses /send, not /actions/send)
+    // 2. Send campaign (new API uses /send, not /actions/send)
     const sendUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}/send`
-    console.log('[NOTIFY] Step 3 — Sending campaign. URL:', sendUrl)
+    console.log('[NOTIFY] Step 2 — Sending campaign. URL:', sendUrl)
 
     const sendRes = await fetch(sendUrl, {
       method: 'POST',
@@ -167,8 +124,8 @@ export async function POST(request: NextRequest) {
     })
 
     const sendText = await sendRes.text()
-    console.log('[NOTIFY] Step 3 — Response status:', sendRes.status)
-    console.log('[NOTIFY] Step 3 — Raw response:', sendText)
+    console.log('[NOTIFY] Step 2 — Response status:', sendRes.status)
+    console.log('[NOTIFY] Step 2 — Raw response:', sendText)
 
     if (!sendRes.ok) {
       let data
