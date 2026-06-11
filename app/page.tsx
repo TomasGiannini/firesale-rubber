@@ -67,6 +67,13 @@ export default function HomePage() {
         </span>
       </div>
 
+      {/* PAYMENT TERMS */}
+      <div style={{ background: '#111827', borderBottom: '1px solid #1e2535', padding: '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 12, color: '#888', fontWeight: 600, letterSpacing: '0.5px' }}>
+          All orders require payment in advance. We accept cash (local pickup), EFT, credit card, and wire transfer.
+        </span>
+      </div>
+
       {/* CATALOG */}
       <CatalogClient />
 
