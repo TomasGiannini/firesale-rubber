@@ -33,11 +33,11 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="header">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ background: '#f4efe4', borderRadius: '50%', padding: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+          <div style={{ background: '#f4efe4', borderRadius: '50%', padding: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
             <img
               src="/logo.png"
               alt="Firesale Rubber"
-              style={{ height: 44, width: 'auto', display: 'block' }}
+              style={{ height: 48, width: 'auto', display: 'block' }}
             />
           </div>
           <div>
@@ -54,23 +54,14 @@ export default function HomePage() {
       </header>
 
       {/* PICKUP BANNER */}
-      <div className="pickup-banner" style={{ display: 'flex', alignItems: 'center', padding: '12px 32px' }}>
-        <div style={{ flex: 1 }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span className="pickup-pin">📍</span>
-          <span className="pickup-text">
-            PICKUP — <strong>VAUGHAN, ONTARIO</strong>
-          </span>
-        </div>
-        <span style={{ flex: 1, textAlign: 'right', fontSize: 12, color: '#5db87a', fontWeight: 600 }}>
-          Shipping available
+      <div className="pickup-banner">
+        <span className="pickup-pin">📍</span>
+        <span className="pickup-text">
+          PICKUP — <strong>VAUGHAN, ONTARIO</strong>
         </span>
-      </div>
-
-      {/* PAYMENT TERMS */}
-      <div style={{ background: '#111827', borderBottom: '1px solid #1e2535', padding: '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 12, color: '#888', fontWeight: 600, letterSpacing: '0.5px' }}>
-          All orders require payment in advance. We accept cash (local pickup), EFT, credit card, and wire transfer.
+        <span className="pickup-divider">|</span>
+        <span className="pickup-sub" style={{ color: '#5db87a', fontWeight: 600 }}>
+          Shipping available
         </span>
       </div>
 
