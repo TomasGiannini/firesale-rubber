@@ -147,9 +147,11 @@ export default function CatalogClient() {
             <span>Clearance prices.</span>
           </h1>
           <p className="hero-desc">
-            New overstock rubber gym flooring — puzzle tiles, rolls, sheets and
-            acoustic underlayment. First-quality products with minor cosmetic
-            variations. Deep discounts available, all prices negotiated.
+            Everything here is the real deal — commercial-grade rubber at
+            firesale prices. Our inventory is a mix of overstock, discontinued
+            custom orders, and cosmetically imperfect pieces that didn't meet our
+            shipping standards. Functionally solid, priced to move. All items sold
+            as-is. Deep discounts available for bulk orders — contact us.
           </p>
         </div>
         <div className="hero-right">
