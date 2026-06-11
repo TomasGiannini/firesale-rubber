@@ -53,21 +53,12 @@ export async function POST(request: NextRequest) {
 
     // 1. Fetch subscribers from MailerLite group
     console.log('[NOTIFY] Fetching subscribers from group:', groupId)
-    const allEmails = await fetchSubscribersFromGroup(mailerLiteKey, groupId)
-    console.log('[NOTIFY] Found subscribers:', allEmails.length)
-
-    // Filter out test domains that Resend blocks
-    const blockedDomains = ['example.com', 'test.com', 'localhost']
-    const emails = allEmails.filter((email) => {
-      const domain = email.split('@')[1]?.toLowerCase()
-      return domain && !blockedDomains.includes(domain)
-    })
+    const emails = await fetchSubscribersFromGroup(mailerLiteKey, groupId)
+    console.log('[NOTIFY] Found subscribers:', emails.length)
 
     if (emails.length === 0) {
-      return NextResponse.json({ error: 'No valid subscribers in group.' }, { status: 400 })
+      return NextResponse.json({ error: 'No subscribers in group.' }, { status: 400 })
     }
-
-    console.log('[NOTIFY] Valid subscribers after filtering:', emails.length)
 
     // 2. Build email payload
     const htmlContent = `
@@ -92,48 +83,59 @@ export async function POST(request: NextRequest) {
     const subject = 'New stock just dropped at Firesale Rubber'
     const from = `${fromName} <${fromEmail}>`
 
-    // 3. Send via Resend batch API (max 100 per batch)
-    const batchSize = 100
-    let sentCount = 0
+    // 3. Send individually via Resend so one bad email doesn't block everyone
+    const results = { sent: [] as string[], failed: [] as { email: string; reason: string }[] }
 
-    for (let i = 0; i < emails.length; i += batchSize) {
-      const batch = emails.slice(i, i + batchSize)
-      const batchPayload = batch.map((email) => ({
-        from,
-        to: [email],
-        subject,
-        html: htmlContent,
-      }))
+    for (const email of emails) {
+      console.log(`[NOTIFY] Sending to: ${email}`)
 
-      console.log(`[NOTIFY] Sending batch ${Math.floor(i / batchSize) + 1} (${batch.length} emails)`)
-
-      const res = await fetch('https://api.resend.com/emails/batch', {
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${resendKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(batchPayload),
+        body: JSON.stringify({
+          from,
+          to: [email],
+          subject,
+          html: htmlContent,
+        }),
       })
 
       const resText = await res.text()
-      console.log(`[NOTIFY] Batch response:`, res.status, resText)
+      console.log(`[NOTIFY] Response for ${email}:`, res.status, resText)
 
       if (!res.ok) {
-        return NextResponse.json(
-          {
-            error: `Failed to send batch ${Math.floor(i / batchSize) + 1}.`,
-            detail: resText,
-          },
-          { status: 500 }
-        )
+        let reason = resText
+        try {
+          const parsed = JSON.parse(resText)
+          reason = parsed.message || resText
+        } catch {
+          /* keep raw text */
+        }
+        results.failed.push({ email, reason })
+      } else {
+        results.sent.push(email)
       }
-
-      sentCount += batch.length
     }
 
-    console.log('[NOTIFY] Success — Sent to', sentCount, 'subscribers')
-    return NextResponse.json({ success: true, sentCount })
+    console.log('[NOTIFY] Done — Sent:', results.sent.length, 'Failed:', results.failed.length)
+
+    if (results.sent.length === 0) {
+      return NextResponse.json(
+        { error: 'All sends failed.', failed: results.failed },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      sentCount: results.sent.length,
+      failedCount: results.failed.length,
+      sent: results.sent,
+      failed: results.failed,
+    })
   } catch (err) {
     console.error('[NOTIFY] Unhandled exception:', err)
     return NextResponse.json(
