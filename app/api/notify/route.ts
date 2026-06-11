@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
 
     if (groupId) {
       campaignBody.groups = [String(groupId)]
-      console.log('[NOTIFY] Using group ID:', groupId, 'Type:', typeof campaignBody.groups)
     }
 
     console.log('[NOTIFY] Step 1 — Creating campaign. Body:', JSON.stringify(campaignBody, null, 2))
@@ -42,35 +41,35 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(campaignBody),
     })
 
-    const campaignData = await campaignRes.json().catch(() => ({}))
+    const campaignText = await campaignRes.text()
     console.log('[NOTIFY] Step 1 — Response status:', campaignRes.status)
-    console.log('[NOTIFY] Step 1 — Response body:', JSON.stringify(campaignData, null, 2))
+    console.log('[NOTIFY] Step 1 — Raw response:', campaignText)
 
     if (!campaignRes.ok) {
+      let data
+      try { data = JSON.parse(campaignText) } catch { data = {} }
       return NextResponse.json(
         {
           step: 'create_campaign',
           status: campaignRes.status,
-          error: campaignData.message || 'Failed to create campaign.',
-          fullResponse: campaignData,
+          error: data.message || 'Failed to create campaign.',
+          fullResponse: data,
         },
         { status: 400 }
       )
     }
 
-    // Safely extract campaign ID — try multiple possible shapes
-    const campaignId =
-      campaignData?.data?.id ??
-      campaignData?.id ??
-      campaignData?.data?.attributes?.id
+    // Extract campaign ID from raw text to avoid JavaScript integer precision loss
+    const idMatch = campaignText.match(/"id"\s*:\s*"?(\d+)"?/)
+    const campaignId = idMatch ? idMatch[1] : null
 
     if (!campaignId) {
-      console.error('[NOTIFY] Could not extract campaign ID from response:', campaignData)
+      console.error('[NOTIFY] Could not extract campaign ID from raw response:', campaignText)
       return NextResponse.json(
         {
           step: 'extract_campaign_id',
           error: 'Campaign created but no ID found in response.',
-          fullResponse: campaignData,
+          rawResponse: campaignText,
         },
         { status: 500 }
       )
@@ -118,18 +117,20 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(contentBody),
     })
 
-    const contentData = await contentRes.json().catch(() => ({}))
+    const contentText = await contentRes.text()
     console.log('[NOTIFY] Step 2 — Response status:', contentRes.status)
-    console.log('[NOTIFY] Step 2 — Response body:', JSON.stringify(contentData, null, 2))
+    console.log('[NOTIFY] Step 2 — Raw response:', contentText)
 
     if (!contentRes.ok) {
+      let data
+      try { data = JSON.parse(contentText) } catch { data = {} }
       return NextResponse.json(
         {
           step: 'set_content',
           status: contentRes.status,
           campaignId,
-          error: contentData.message || 'Failed to set campaign content.',
-          fullResponse: contentData,
+          error: data.message || 'Failed to set campaign content.',
+          fullResponse: data,
         },
         { status: 400 }
       )
@@ -148,18 +149,20 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const sendData = await sendRes.json().catch(() => ({}))
+    const sendText = await sendRes.text()
     console.log('[NOTIFY] Step 3 — Response status:', sendRes.status)
-    console.log('[NOTIFY] Step 3 — Response body:', JSON.stringify(sendData, null, 2))
+    console.log('[NOTIFY] Step 3 — Raw response:', sendText)
 
     if (!sendRes.ok) {
+      let data
+      try { data = JSON.parse(sendText) } catch { data = {} }
       return NextResponse.json(
         {
           step: 'send_campaign',
           status: sendRes.status,
           campaignId,
-          error: sendData.message || 'Failed to send campaign.',
-          fullResponse: sendData,
+          error: data.message || 'Failed to send campaign.',
+          fullResponse: data,
         },
         { status: 400 }
       )
