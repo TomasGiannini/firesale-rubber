@@ -16,14 +16,6 @@ export const metadata: Metadata = {
     description:
       'Clearance pricing on overstock rubber gym flooring — puzzle tiles, rolls, sheets, and acoustic underlayment. Pickup in Vaughan, Ontario.',
     url: 'https://www.firesalerubber.com',
-    images: [
-      {
-        url: '/og/default-og.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Firesale Rubber — Overstock Rubber Products',
-      },
-    ],
   },
 }
 

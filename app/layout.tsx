@@ -26,20 +26,11 @@ export const metadata: Metadata = {
     siteName: SEO_CONFIG.siteName,
     title: SEO_CONFIG.defaultTitle,
     description: SEO_CONFIG.defaultDescription,
-    images: [
-      {
-        url: SEO_CONFIG.defaultOgImage,
-        width: 1200,
-        height: 630,
-        alt: 'Firesale Rubber — Overstock Rubber Products',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: SEO_CONFIG.defaultTitle,
     description: SEO_CONFIG.defaultDescription,
-    images: [SEO_CONFIG.defaultOgImage],
     creator: SEO_CONFIG.twitterHandle,
   },
   alternates: {
