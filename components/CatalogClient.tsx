@@ -146,12 +146,36 @@ export default function CatalogClient() {
             <br />
             <span>Clearance prices.</span>
           </h1>
-          <p className="hero-desc">
-            Everything here is the real deal — commercial-grade rubber at
-            firesale prices. Our inventory is a mix of overstock, discontinued
-            custom orders, and cosmetically imperfect pieces that didn't meet our
-            shipping standards. Functionally solid, priced to move. All items sold
-            as-is. Deep discounts available for bulk orders — contact us.
+          <p className="hero-desc" style={{ marginBottom: 16 }}>
+            Everything here is the real deal — <strong style={{ color: '#f0c040' }}>commercial-grade rubber at firesale prices.</strong>
+          </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: 16 }}>
+            {['Overstock', 'Discontinued', 'Cosmetically imperfect', 'Functionally solid'].map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.8px',
+                  color: '#f0c040',
+                  border: '1px solid #f0c040',
+                  padding: '4px 10px',
+                  borderRadius: 2,
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <p className="hero-desc" style={{ marginBottom: 12 }}>
+            All items <strong>sold as-is</strong>. Prices negotiated per piece — no retail markup.
+          </p>
+
+          <p className="hero-desc" style={{ color: '#f0c040', fontWeight: 700 }}>
+            Deep discounts on bulk orders — call or text to discuss.
           </p>
         </div>
         <div className="hero-right">
