@@ -153,7 +153,7 @@ export default function CatalogClient() {
           </p>
 
           <p className="hero-desc" style={{ color: '#f0c040', fontWeight: 700 }}>
-            All items sold as-is. Deep discounts available for bulk orders.
+            All items final sale. Deep discounts available for bulk orders.
           </p>
         </div>
         <div className="hero-right">
