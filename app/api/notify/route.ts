@@ -144,6 +144,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[NOTIFY] Success — Campaign sent. ID:', campaignId)
+    await deleteCampaign(apiKey, campaignId)
+    console.log('[NOTIFY] Campaign deleted after send. ID:', campaignId)
     return NextResponse.json({ success: true, campaignId })
   } catch (err) {
     console.error('[NOTIFY] Unhandled exception:', err)
