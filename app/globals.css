@@ -421,3 +421,84 @@ button { font-family: inherit; cursor: pointer; }
 .admin-lightbox-close:hover { color: #f0c040; }
 .admin-lightbox-body { display: flex; gap: 12px; overflow-x: auto; max-width: 90vw; max-height: 85vh; align-items: center; scroll-snap-type: x mandatory; }
 .admin-lightbox-body img { max-height: 80vh; max-width: 80vw; object-fit: contain; border-radius: 8px; scroll-snap-align: center; flex-shrink: 0; background: #111; }
+
+.subscribe-section {
+  background: linear-gradient(135deg, #0d1225 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 32px;
+  text-align: center;
+}
+.subscribe-inner {
+  max-width: 480px;
+  margin: 0 auto;
+}
+.subscribe-heading {
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+.subscribe-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.subscribe-form {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.subscribe-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-inner);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+.subscribe-input:focus {
+  outline: 2px solid var(--gold);
+  border-color: var(--gold);
+}
+.subscribe-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.subscribe-button:hover:not(:disabled) {
+  background: #ffe060;
+}
+.subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.subscribe-message {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.subscribe-message.success {
+  color: var(--pickup-text);
+}
+.subscribe-message.error {
+  color: #e74c3c;
+}
+
+@media (max-width: 700px) {
+  .subscribe-section { padding: 24px 16px; }
+  .subscribe-form { flex-direction: column; }
+  .subscribe-button { width: 100%; }
+}

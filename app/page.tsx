@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SEO_CONFIG } from '@/lib/seo'
 import CatalogClient from '@/components/CatalogClient'
+import SubscribeForm from '@/components/SubscribeForm'
 
 export const metadata: Metadata = {
   title: 'Overstock Rubber Gym Flooring | Firesale Rubber',
@@ -56,6 +57,9 @@ export default function HomePage() {
           Shipping available
         </span>
       </div>
+
+      {/* SUBSCRIBE */}
+      <SubscribeForm />
 
       {/* CATALOG */}
       <CatalogClient />

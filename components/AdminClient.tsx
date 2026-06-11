@@ -189,6 +189,8 @@ function AdminDashboard() {
   const [formSuccess, setFormSuccess] = useState('')
   const [lightboxUrls, setLightboxUrls] = useState<string[]>([])
   const [lightboxName, setLightboxName] = useState('')
+  const [notifyStatus, setNotifyStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [notifyMessage, setNotifyMessage] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -237,6 +239,28 @@ function AdminDashboard() {
   function clearMessages() {
     setFormError('')
     setFormSuccess('')
+  }
+
+  async function notifySubscribers() {
+    if (!confirm('Send a "New Stock" email to all subscribers?')) return
+    setNotifyStatus('loading')
+    setNotifyMessage('')
+
+    try {
+      const res = await fetch('/api/notify', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setNotifyStatus('error')
+        setNotifyMessage(data.error || 'Failed to send notification.')
+      } else {
+        setNotifyStatus('success')
+        setNotifyMessage('Notification sent successfully.')
+      }
+    } catch {
+      setNotifyStatus('error')
+      setNotifyMessage('Network error. Please try again.')
+    }
   }
 
   function getFormData(): Record<string, any> {
@@ -505,8 +529,44 @@ function AdminDashboard() {
         <h1>
           FIRESALE <span>RUBBER</span> — Admin
         </h1>
-        <a href="/">← View site</a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={notifySubscribers}
+            disabled={notifyStatus === 'loading'}
+            style={{
+              background: '#f0c040',
+              color: '#0a0e1a',
+              border: 'none',
+              borderRadius: 4,
+              padding: '8px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              opacity: notifyStatus === 'loading' ? 0.6 : 1,
+            }}
+          >
+            {notifyStatus === 'loading' ? 'Sending...' : 'Notify Subscribers'}
+          </button>
+          <a href="/">← View site</a>
+        </div>
       </div>
+      {notifyMessage && (
+        <div
+          style={{
+            maxWidth: 960,
+            margin: '12px auto 0',
+            padding: '10px 16px',
+            borderRadius: 4,
+            fontSize: 13,
+            fontWeight: 600,
+            background: notifyStatus === 'success' ? '#1a2e1a' : '#3a0808',
+            color: notifyStatus === 'success' ? '#5db87a' : '#e74c3c',
+            border: `1px solid ${notifyStatus === 'success' ? '#2d5a2d' : '#c0392b'}`,
+          }}
+        >
+          {notifyMessage}
+        </div>
+      )}
 
       <div className="admin-body">
         {/* FORM */}
