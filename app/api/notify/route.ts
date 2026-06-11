@@ -10,7 +10,7 @@ async function fetchSubscribersFromGroup(apiKey: string, groupId: string): Promi
   let url: string | null = `https://connect.mailerlite.com/api/groups/${groupId}/subscribers?limit=100`
 
   while (url) {
-    const res = await fetch(url, {
+    const res: Response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         Accept: 'application/json',
