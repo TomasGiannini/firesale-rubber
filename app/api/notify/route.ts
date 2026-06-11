@@ -4,6 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const apiKey = process.env.MAILERLITE_API_KEY
     if (!apiKey) {
+      console.error('[NOTIFY] MAILERLITE_API_KEY missing')
       return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 })
     }
 
@@ -15,7 +16,6 @@ export async function POST(request: NextRequest) {
     const campaignBody: Record<string, unknown> = {
       name: `New Stock Alert - ${new Date().toLocaleDateString('en-CA')}`,
       type: 'regular',
-      language_id: 21,
       emails: [
         {
           subject: 'New stock just dropped at Firesale Rubber',
@@ -26,8 +26,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (groupId) {
-      campaignBody.groups = [groupId]
+      campaignBody.groups = [String(groupId)]
+      console.log('[NOTIFY] Using group ID:', groupId, 'Type:', typeof campaignBody.groups)
     }
+
+    console.log('[NOTIFY] Step 1 — Creating campaign. Body:', JSON.stringify(campaignBody, null, 2))
 
     const campaignRes = await fetch('https://connect.mailerlite.com/api/campaigns', {
       method: 'POST',
@@ -39,16 +42,41 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(campaignBody),
     })
 
+    const campaignData = await campaignRes.json().catch(() => ({}))
+    console.log('[NOTIFY] Step 1 — Response status:', campaignRes.status)
+    console.log('[NOTIFY] Step 1 — Response body:', JSON.stringify(campaignData, null, 2))
+
     if (!campaignRes.ok) {
-      const data = await campaignRes.json().catch(() => ({}))
       return NextResponse.json(
-        { error: data.message || 'Failed to create campaign.' },
+        {
+          step: 'create_campaign',
+          status: campaignRes.status,
+          error: campaignData.message || 'Failed to create campaign.',
+          fullResponse: campaignData,
+        },
         { status: 400 }
       )
     }
 
-    const campaignData = await campaignRes.json()
-    const campaignId = campaignData.data.id
+    // Safely extract campaign ID — try multiple possible shapes
+    const campaignId =
+      campaignData?.data?.id ??
+      campaignData?.id ??
+      campaignData?.data?.attributes?.id
+
+    if (!campaignId) {
+      console.error('[NOTIFY] Could not extract campaign ID from response:', campaignData)
+      return NextResponse.json(
+        {
+          step: 'extract_campaign_id',
+          error: 'Campaign created but no ID found in response.',
+          fullResponse: campaignData,
+        },
+        { status: 500 }
+      )
+    }
+
+    console.log('[NOTIFY] Step 1 — Campaign ID:', campaignId)
 
     // 2. Set campaign content
     const htmlContent = `
@@ -71,52 +99,79 @@ export async function POST(request: NextRequest) {
       </div>
     `
 
-    const contentRes = await fetch(
-      `https://connect.mailerlite.com/api/campaigns/${campaignId}/content`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          html: htmlContent,
-          plain: 'New stock just dropped at Firesale Rubber. Browse now: https://www.firesalerubber.com',
-        }),
-      }
-    )
+    const contentUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}/content`
+    const contentBody = {
+      html: htmlContent,
+      plain: 'New stock just dropped at Firesale Rubber. Browse now: https://www.firesalerubber.com',
+    }
+
+    console.log('[NOTIFY] Step 2 — Setting content. URL:', contentUrl)
+    console.log('[NOTIFY] Step 2 — Content body:', JSON.stringify(contentBody, null, 2))
+
+    const contentRes = await fetch(contentUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(contentBody),
+    })
+
+    const contentData = await contentRes.json().catch(() => ({}))
+    console.log('[NOTIFY] Step 2 — Response status:', contentRes.status)
+    console.log('[NOTIFY] Step 2 — Response body:', JSON.stringify(contentData, null, 2))
 
     if (!contentRes.ok) {
-      const data = await contentRes.json().catch(() => ({}))
       return NextResponse.json(
-        { error: data.message || 'Failed to set campaign content.' },
+        {
+          step: 'set_content',
+          status: contentRes.status,
+          campaignId,
+          error: contentData.message || 'Failed to set campaign content.',
+          fullResponse: contentData,
+        },
         { status: 400 }
       )
     }
 
     // 3. Send campaign
-    const sendRes = await fetch(
-      `https://connect.mailerlite.com/api/campaigns/${campaignId}/actions/send`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: 'application/json',
-        },
-      }
-    )
+    const sendUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}/actions/send`
+
+    console.log('[NOTIFY] Step 3 — Sending campaign. URL:', sendUrl)
+
+    const sendRes = await fetch(sendUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json',
+      },
+    })
+
+    const sendData = await sendRes.json().catch(() => ({}))
+    console.log('[NOTIFY] Step 3 — Response status:', sendRes.status)
+    console.log('[NOTIFY] Step 3 — Response body:', JSON.stringify(sendData, null, 2))
 
     if (!sendRes.ok) {
-      const data = await sendRes.json().catch(() => ({}))
       return NextResponse.json(
-        { error: data.message || 'Failed to send campaign.' },
+        {
+          step: 'send_campaign',
+          status: sendRes.status,
+          campaignId,
+          error: sendData.message || 'Failed to send campaign.',
+          fullResponse: sendData,
+        },
         { status: 400 }
       )
     }
 
+    console.log('[NOTIFY] Success — Campaign sent. ID:', campaignId)
     return NextResponse.json({ success: true, campaignId })
-  } catch {
-    return NextResponse.json({ error: 'Server error. Please try again.' }, { status: 500 })
+  } catch (err) {
+    console.error('[NOTIFY] Unhandled exception:', err)
+    return NextResponse.json(
+      { error: 'Server error. Please try again.', detail: String(err) },
+      { status: 500 }
+    )
   }
 }
