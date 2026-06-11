@@ -33,11 +33,11 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="header">
         <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '50%', padding: 4, flexShrink: 0 }}>
+          <div style={{ height: 54, width: 54, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
             <img
               src="/logo.png"
               alt="Firesale Rubber"
-              style={{ height: 72, width: 72, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+              style={{ height: '100%', width: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.15)' }}
             />
           </div>
           <div>
@@ -88,8 +88,12 @@ export default function HomePage() {
       {/* FOOTER */}
       <footer className="footer">
         <div className="footer-logo">
-          <div style={{ backgroundColor: 'white', borderRadius: '50%', padding: 3, display: 'inline-block' }}>
-            <img src="/logo.png" alt="Firesale Rubber" style={{ height: 36, width: 36, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+          <div style={{ height: 36, width: 36, borderRadius: '50%', overflow: 'hidden', display: 'inline-block' }}>
+            <img
+              src="/logo.png"
+              alt="Firesale Rubber"
+              style={{ height: '100%', width: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.15)' }}
+            />
           </div>
         </div>
         <div className="footer-right">
