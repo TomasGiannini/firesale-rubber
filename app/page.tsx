@@ -54,10 +54,15 @@ export default function HomePage() {
       </header>
 
       {/* PICKUP BANNER */}
-      <div className="pickup-banner">
-        <span className="pickup-pin">📍</span>
-        <span className="pickup-text">
-          PICKUP — <strong>VAUGHAN, ONTARIO</strong>
+      <div className="pickup-banner" style={{ justifyContent: 'space-between', padding: '12px 32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span className="pickup-pin">📍</span>
+          <span className="pickup-text">
+            PICKUP — <strong>VAUGHAN, ONTARIO</strong>
+          </span>
+        </div>
+        <span style={{ fontSize: 12, color: '#5db87a', fontWeight: 600 }}>
+          Shipping available
         </span>
       </div>
 
