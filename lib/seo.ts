@@ -1,10 +1,10 @@
 export const SEO_CONFIG = {
   siteName: 'Firesale Rubber',
   siteUrl: 'https://www.firesalerubber.com',
-  defaultTitle: 'Firesale Rubber | Overstock & Defective Rubber Products',
+  defaultTitle: 'Firesale Rubber | Overstock & Discounted Rubber Flooring',
   titleTemplate: '%s | Firesale Rubber',
   defaultDescription:
-    'Overstock and defective rubber products at clearance prices. Gym flooring, tiles, rolls, sheets, and acoustic underlayment. Pickup in Vaughan, Ontario.',
+    'Overstock and discounted rubber flooring at clearance prices. Gym flooring, tiles, rolls, sheets, and acoustic underlayment. Pickup in Vaughan, Ontario.',
   defaultOgImage: '/og/default-og.jpg',
   twitterHandle: '@firesalerubber',
   locale: 'en_CA',

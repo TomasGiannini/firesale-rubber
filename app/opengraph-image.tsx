@@ -69,7 +69,7 @@ export default async function Image() {
             maxWidth: 900,
           }}
         >
-          Overstock & Defective Rubber Products
+          Overstock & Discounted Rubber Flooring
         </div>
         <div
           style={{
